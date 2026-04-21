@@ -18,7 +18,7 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/orchetect/swift-midi-events", from: "0.1.0"),
+        .package(url: "https://github.com/orchetect/swift-midi-core", branch: "main"), // TODO: from: "0.1.0"),
         .package(url: "https://github.com/orchetect/swift-data-parsing", from: "0.1.2"),
         .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.0")
     ],
@@ -26,7 +26,8 @@ let package = Package(
         .target(
             name: "SwiftMIDIFile",
             dependencies: [
-                .product(name: "SwiftMIDIEvents", packge: "swift-midi-events"),
+                .product(name: "SwiftMIDICore", package: "swift-midi-core"),
+                .product(name: "SwiftMIDIInternals", package: "swift-midi-core"),
                 .product(name: "SwiftDataParsing", package: "swift-data-parsing"),
                 .product(name: "SwiftTimecodeCore", package: "swift-timecode")
             ],
@@ -35,7 +36,7 @@ let package = Package(
         .testTarget(
             name: "SwiftMIDIFileTests",
             dependencies: [
-                .target(name: "SwiftMIDIFile")
+                "SwiftMIDIFile"
             ]
         )
     ]
