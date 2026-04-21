@@ -27,7 +27,7 @@ on:
     - cron: '35 11 * * *'   # once a day @ 11:35am UTC (4:35am PST)
 
 env:
-  SCHEME: "swift-midi-core"
+  SCHEME: "swift-midi-file"
   WORKSPACEPATH: ".swiftpm/xcode/package.xcworkspace"
 
 jobs:
