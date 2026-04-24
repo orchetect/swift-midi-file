@@ -6,7 +6,7 @@
 
 extension Collection where Element: MIDI1FileChunk {
     /// Returns `true` if the content of the chunk collection is equal to another chunk collection.
-    /// (Omits ``id`` properties from the comparison.)
+    /// (Omits `id` properties from the comparison.)
     public func isEqual(to other: some Collection<Element>) -> Bool {
         guard count == other.count else { return false }
         
