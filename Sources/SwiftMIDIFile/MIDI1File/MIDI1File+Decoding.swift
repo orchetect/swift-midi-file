@@ -10,8 +10,10 @@ import SwiftMIDICore
 // MARK: - Internal Parsing Entry-point Methods
 
 extension MIDI1File {
-    /// Decode chunks sequentially, without concurrency.
-    mutating func decode(
+    /// Initialize by loading the contents of a MIDI file's raw data.
+    ///
+    /// - Tip: Consider using the `async` overload of this initializer, as it is much more performant.
+    public init(
         data: some DataProtocol & Sendable,
         options: MIDI1FileDecodeOptions,
         predicate: DecodePredicate?
@@ -26,10 +28,10 @@ extension MIDI1File {
         )
         chunks = parsedChunks
     }
-    
-    /// Decode chunks concurrently for improved performance.
+
+    /// Initialize by loading the contents of a MIDI file's raw data, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-    mutating func decode(
+    public init(
         data: some DataProtocol & Sendable,
         options: MIDI1FileDecodeOptions,
         predicate: DecodePredicate?
@@ -38,19 +40,30 @@ extension MIDI1File {
         
         header = parser.fileDescriptor.header
         
-        let parsedChunks = try await parser.chunks(
-            options: options,
-            predicate: predicate
-        )
-        chunks = parsedChunks
+        // TODO: Workaround for Swift 6.1 compiler bug which prevents us from using throws(MIDIFileDecodeError) on chunks(), but would work in 6.2+
+        do {
+            let parsedChunks = try await parser.chunks(
+                options: options,
+                predicate: predicate
+            )
+            chunks = parsedChunks
+        } catch let error as MIDIFileDecodeError { // TODO: only necessary as a workaround
+            throw error
+        } catch { // TODO: only necessary as a workaround
+            // should never happen, as all errors thrown are MIDIFileDecodeError.
+            // we only have a spillover catch because of the Swift 6.1 compiler bug not allowing
+            // typed throws on the chunks() method.
+            throw .malformed(error.localizedDescription)
+        }
     }
-    
-    /// Decode tracks concurrently for improved performance and call a closure every time a track finishes parsing.
+
+    /// Initialize by loading the contents of a MIDI file's raw data, parsing chunks concurrently for improved performance.
+    /// As each chunk completes parsing, a closure is called with the parsing results and the chunk's content.
     ///
     /// If the file header cannot be parsed or overall file structure is malformed, this method throws an error.
     /// Errors encountered during individual chunk parsing are returned within the result closure and not thrown from this method.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
-    mutating func decode(
+    public init(
         data: some DataProtocol & Sendable,
         options: MIDI1FileDecodeOptions,
         predicate: DecodePredicate?,

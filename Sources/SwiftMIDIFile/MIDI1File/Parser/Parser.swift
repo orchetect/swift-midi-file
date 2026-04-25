@@ -61,12 +61,13 @@ extension MIDI1File.Parser {
         return newChunks
     }
     
+    // TODO: Swift 6.1 compiler bug prevents us from using throws(MIDIFileDecodeError) here, but would work in 6.2+
     /// Parses all chunks concurrently and returns all chunks in order once all tracks have been parsed.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     func chunks(
         options: MIDI1FileDecodeOptions,
         predicate: MIDI1File.DecodePredicate?
-    ) async throws(MIDIFileDecodeError) -> [MIDI1File.AnyChunk] {
+    ) async throws /* (MIDIFileDecodeError) */ -> [MIDI1File.AnyChunk] {
         let result: Result<[MIDI1File.AnyChunk], MIDIFileDecodeError> = await withTaskGroup(
             of: Result<(index: Int, chunk: MIDI1File.AnyChunk?), MIDIFileDecodeError>.self,
             returning: Result<[MIDI1File.AnyChunk], MIDIFileDecodeError>.self
