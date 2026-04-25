@@ -45,15 +45,29 @@ jobs:
     - name: Unit Tests
       run: xcodebuild test -workspace "$WORKSPACEPATH" -scheme "$SCHEME" -destination "platform=macOS" | xcbeautify --renderer github-actions && exit ${PIPESTATUS[0]}
   
-  macOS-15:
-    name: Tests (macOS 15)
+  macOS-15-xcode-16-4:
+    name: Tests (macOS 15 - Xcode 16.4)
     runs-on: macos-15
     timeout-minutes: 20
     steps:
     - uses: actions/checkout@main
     - uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: 16.4
+    - name: Build
+      run: xcodebuild build -workspace "$WORKSPACEPATH" -scheme "$SCHEME" -destination "generic/platform=macOS" | xcbeautify --renderer github-actions && exit ${PIPESTATUS[0]}
+    - name: Unit Tests
+      run: xcodebuild test -workspace "$WORKSPACEPATH" -scheme "$SCHEME" -destination "platform=macOS" | xcbeautify --renderer github-actions && exit ${PIPESTATUS[0]}
+  
+  macOS-15-xcode-26-3:
+    name: Tests (macOS 15 - Xcode 26.3)
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@main
+    - uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: 26.3 # latest-stable
     - name: Build
       run: xcodebuild build -workspace "$WORKSPACEPATH" -scheme "$SCHEME" -destination "generic/platform=macOS" | xcbeautify --renderer github-actions && exit ${PIPESTATUS[0]}
     - name: Unit Tests
