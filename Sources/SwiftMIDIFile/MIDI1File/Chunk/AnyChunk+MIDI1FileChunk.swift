@@ -1,6 +1,6 @@
 //
 //  AnyChunk+MIDI1FileChunk.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,7 +11,7 @@ extension MIDI1File.AnyChunk: MIDI1FileChunk {
         case let .undefined(chunk): chunk.identifier
         }
     }
-    
+
     public func isEqual(to other: Self) -> Bool {
         switch (self, other) {
         case let (.track(lhs), .track(rhs)): lhs.isEqual(to: rhs)

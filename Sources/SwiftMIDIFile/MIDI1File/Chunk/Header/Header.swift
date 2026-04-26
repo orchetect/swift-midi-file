@@ -1,12 +1,12 @@
 //
 //  Header.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
 
 // Standard MIDI File 1.0 Spec:
 //
@@ -84,27 +84,27 @@ extension MIDI1File {
     public struct Header {
         /// MIDI file format.
         public var format: MIDI1FileFormat
-        
+
         /// MIDI file timebase (for duration calculations).
         public var timebase: Timebase
-        
+
         /// Additional bytes found at the end of the header. Typically this should be left empty.
         ///
         /// The Standard MIDI File spec allows for additional bytes at the end of the file header.
         /// Technically additional bytes should only be used if they are defined at some point in
         /// a revision to the Standard MIDI File spec. However, until such event happens, file parsers
         /// should preserve and ignore these bytes.
-        public var additionalBytes: Data? = nil
-        
+        public var additionalBytes: Data?
+
         public init(
             format: MIDI1FileFormat = .multipleTracksSynchronous,
             timebase: Timebase = .default()
         ) {
             self.format = format
             self.timebase = timebase
-            self.additionalBytes = nil
+            additionalBytes = nil
         }
-        
+
         public init(
             format: MIDI1FileFormat = .multipleTracksSynchronous,
             timebase: Timebase = .default(),

@@ -1,6 +1,6 @@
 //
 //  UndefinedChunk+Encoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,19 +11,19 @@ extension MIDI1File.UndefinedChunk {
     public func midi1FileRawBytes() throws(MIDIFileEncodeError) -> Data {
         try midi1FileRawBytes(as: Data.self)
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) throws(MIDIFileEncodeError) -> D {
         // assemble track body without header or length
-        
+
         let bodyData = rawData
-        
+
         // assemble full chunk data with header and length
-        
+
         var data = D()
-        
+
         // 4-byte chunk identifier
         data += identifier.string.toASCIIData()
-        
+
         // chunk data length (32-bit 4 byte big endian integer)
         if let trackLength = UInt32(exactly: bodyData.count) {
             data += trackLength.toData(.bigEndian)
@@ -34,9 +34,9 @@ extension MIDI1File.UndefinedChunk {
                 "Chunk length overflowed maximum size."
             )
         }
-        
+
         data += bodyData
-        
+
         return data
     }
 }

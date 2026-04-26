@@ -1,18 +1,18 @@
 //
 //  AnyMIDIFileEventDecodeResult.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
 public enum AnyMIDIFileEventDecodeResult {
     /// Event successfully decoded.
     case event(payload: any MIDIFileEventPayload, byteLength: Int)
-    
+
     /// An error was encountered during decoding, but the error is recoverable and track parsing
     /// can continue.
     /// If a suitable substitute for the event is possible, `payload` will be non-`nil`.
     case recoverableError(payload: (any MIDIFileEventPayload)?, byteLength: Int, error: MIDIFileDecodeError)
-    
+
     /// An error was encountered during decoding.
     /// No substitute event is possible and track parsing cannot continue.
     case unrecoverableError(error: MIDIFileDecodeError)
@@ -34,7 +34,7 @@ extension AnyMIDIFileEventDecodeResult {
             nil
         }
     }
-    
+
     /// If the result contains an error, it is returned.
     public var error: MIDIFileDecodeError? {
         switch self {
@@ -42,11 +42,11 @@ extension AnyMIDIFileEventDecodeResult {
             nil
         case let .recoverableError(payload: _, byteLength: _, error: error):
             error
-        case let.unrecoverableError(error: error):
+        case let .unrecoverableError(error: error):
             error
         }
     }
-    
+
     /// Returns `true` if a payload is present and it is lossy (a substitute event
     /// provided after encountering an error during decoding.
     public var isPayloadLossy: Bool {

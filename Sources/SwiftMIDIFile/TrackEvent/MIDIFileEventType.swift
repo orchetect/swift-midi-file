@@ -1,6 +1,6 @@
 //
 //  MIDIFileEventType.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -47,6 +47,7 @@ extension MIDIFileEventType {
     /// Returns the concrete type associated with the MIDI file event.
     @inline(__always)
     public var concreteType: any MIDIFileEventPayload.Type {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .cc:                 MIDIFileEvent.CC.self
         case .channelPrefix:      MIDIFileEvent.ChannelPrefix.self
@@ -71,6 +72,7 @@ extension MIDIFileEventType {
         case .unrecognizedMeta:   MIDIFileEvent.UnrecognizedMeta.self
         case .xmfPatchTypePrefix: MIDIFileEvent.XMFPatchTypePrefix.self
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }
 
@@ -94,21 +96,21 @@ extension MIDIFileEventType {
             runningStatus: runningStatus,
             detectParameterNumberSequence: detectParameterNumberSequence
         ) else { return nil }
-        
+
         self = eventType
     }
-    
+
     private static func eventType(
         atStartOf data: some DataProtocol,
         runningStatus: UInt8?,
         detectParameterNumberSequence: Bool
     ) -> Self? {
         // event types here are checked in order of most commonly used first
-        
+
         // status nibble (top 4 bits) of the event's status byte.
         // running status only applies to events with a top nibble in `0x8 ... 0xE`
         guard let statusNibble = (runningStatus ?? data.first)?.nibbles.high else { return nil }
-        
+
         switch statusNibble {
         case 0x8:
             return .noteOff
@@ -140,7 +142,7 @@ extension MIDIFileEventType {
         default:
             break
         }
-        
+
         if data.starts(with: [0xF0]) { // (could be a sysex or universal sysex)
             if let len = data.midi1FileVariableLengthValue()?.byteLength {
                 let firstMsgByteOffset = len + 1
@@ -158,7 +160,7 @@ extension MIDIFileEventType {
                 return .sysEx7
             }
         }
-        
+
         switch data.prefix(3) {
         // 0xFF events
         case let d where d.starts(with: MIDIFileEvent.SequenceNumber.prefixBytes): return .sequenceNumber
@@ -182,19 +184,20 @@ extension MIDIFileEventType {
         case let d where d.starts(with: MIDIFileEvent.Text.EventType.deviceName.prefixBytes): return .text
         default: break
         }
-        
+
         // this check should be last
         if data.starts(with: [0xFF]) {
             return .unrecognizedMeta
         }
-        
+
         return nil
     }
-    
+
     /// Returns the byte count requirements for early validation of event decoding.
     /// Every event has a minimum byte count, but some are fixed length and some are variable-length.
     @inline(__always)
     public var midi1ByteLength: (minimum: Int, isFixed: Bool) {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .cc:                 (minimum: 3, isFixed: true)
         case .channelPrefix:      (minimum: 4, isFixed: true)
@@ -219,11 +222,13 @@ extension MIDIFileEventType {
         case .unrecognizedMeta:   (minimum: 3, isFixed: false)
         case .xmfPatchTypePrefix: (minimum: 4, isFixed: true)
         }
+        // swiftformat:enable consecutiveSpaces
     }
-    
+
     /// Returns `true` if the event supports running status when encoded in a MIDI file track.
     @inline(__always)
     public var isMIDI1RunningStatusSupported: Bool {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .cc:                 true
         case .channelPrefix:      false
@@ -248,5 +253,6 @@ extension MIDIFileEventType {
         case .unrecognizedMeta:   false
         case .xmfPatchTypePrefix: false
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }

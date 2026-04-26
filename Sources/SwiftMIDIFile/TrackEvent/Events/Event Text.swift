@@ -1,12 +1,12 @@
 //
 //  Event Text.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - Text
 
@@ -27,7 +27,7 @@ extension MIDIFileEvent {
     public struct Text {
         /// Type of text event.
         public var textType: EventType = .text
-        
+
         /// Text content.
         ///
         /// ASCII text only. If extended characters or encodings are used, it will be converted to
@@ -56,7 +56,7 @@ extension MIDIFileEvent {
         ) {
             textType = type
             text = string
-            
+
             text_Validate()
         }
 
@@ -151,12 +151,14 @@ extension MIDI1File.Track.Event {
 // MARK: - Encoding
 
 extension MIDIFileEvent.Text: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .text }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .text
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .text(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -170,7 +172,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let textType: EventType
         let text: String
@@ -180,7 +182,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
                 // 2-byte preambles
                 let headerBytes = try parser.toMIDIFileDecodeError(
                     malformedReason: "Text is missing event header bytes.",
-                    try parser.read(bytes: 2)
+                    parser.read(bytes: 2)
                 )
                 guard let textTypeMatch = EventType(midi1FileRawBytes: headerBytes)
                 else {
@@ -188,18 +190,18 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
                         "Event is not a text event."
                     )
                 }
-                
+
                 let length = try parser.midi1FileVariableLengthValue()
-                
+
                 let byteSlice = try parser.toMIDIFileDecodeError(
                     malformedReason: "Text does not have enough bytes.",
-                    try parser.read(bytes: length)
+                    parser.read(bytes: length)
                 )
-                
+
                 let formedText = byteSlice.asciiDataToStringLossy() // .removing(.newlines)
-                
+
                 let byteLength = parser.readOffset
-                
+
                 return (
                     textType: textTypeMatch,
                     text: formedText,
@@ -209,31 +211,31 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         let newEvent = Self(type: textType, string: text)
-        
+
         return .event(
             payload: newEvent,
             byteLength: byteLength
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 01 length text
-        
+
         let stringData = text.data(using: .nonLossyASCII) ?? Data()
-        
+
         return textType.prefixBytes
             // length
             + D(midi1FileVariableLengthValue: stringData.count)
             // text
             + stringData
     }
-    
+
     public var midiFileDescription: String {
         "\(textType): " + text.quoted
     }
-    
+
     public var midiFileDebugDescription: String {
         "Text(" + midiFileDescription + ")"
     }
@@ -245,49 +247,49 @@ extension MIDIFileEvent.Text {
     /// Specialized text-based MIDI file track events.
     public enum EventType: String {
         // MARK: Track Events - First track
-        
+
         // MARK: ... head of track
-        
+
         /// Copyright text.
         /// If present, this event should only exist at the start of the first track.
         case copyright
-        
+
         // MARK: ... anywhere in track
-        
+
         /// Marker text event.
         /// If present, this event can appear anywhere within a track, but should only exist in the first track.
         case marker
-        
+
         /// Cue point text event.
         /// If present, this event can appear anywhere within a track, but should only exist in the first track.
         case cuePoint
 
         // MARK: Track Events - Any track
-        
+
         // MARK: ... head of track
-        
+
         /// Track or sequence name text event.
         /// If present, this event can be used in one or more tracks, but should only exist at the start of each track.
         case trackOrSequenceName
-        
+
         /// Instrument name text event.
         /// If present, this event can be used in one or more tracks, but should only exist at the start of each track.
         case instrumentName
-        
+
         /// Generic text event.
         /// If present, this event can be used in one or more tracks, but should only exist at the start of each track.
         case text
-        
+
         // MARK: ... anywhere in track
-        
+
         /// Program name text event.
         /// This event can be used as often as desired anywhere within any track(s).
         case programName
-        
+
         /// Device name text event.
         /// This event can be used as often as desired anywhere within any track(s).
         case deviceName
-        
+
         /// Lyric text event.
         /// This event can be used as often as desired anywhere within any track(s).
         case lyric
@@ -318,6 +320,7 @@ extension MIDIFileEvent.Text.EventType {
 extension MIDIFileEvent.Text.EventType {
     /// The prefix bytes that define the start of the event.
     public var prefixBytes: [UInt8] {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .text:                [0xFF, 0x01]
         case .copyright:           [0xFF, 0x02]
@@ -329,5 +332,6 @@ extension MIDIFileEvent.Text.EventType {
         case .programName:         [0xFF, 0x08]
         case .deviceName:          [0xFF, 0x09]
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }

@@ -1,6 +1,6 @@
 //
 //  MIDI1FileChunkDecodeOptions.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -9,14 +9,14 @@ public struct MIDI1FileChunkDecodeOptions {
     /// Bundle RPN/NRPN CC message sequences into `rpn`/`nrpn` event types.
     /// If `false`, the message sequences will be parsed as individual CC messages.
     public var bundleRPNAndNRPNEvents: Bool
-    
+
     /// The maximum number of events parsed from each track.
     /// If `nil`, all events are parsed.
     public var maxEventCount: Int?
-    
+
     /// The strategy to employ when errors are encountered while decoding tracks.
     public var errorStrategy: ErrorStrategy
-    
+
     public init(
         bundleRPNAndNRPNEvents: Bool = true,
         maxEventCount: Int? = nil,

@@ -1,6 +1,6 @@
 //
 //  MIDIFileDecodeError.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -13,7 +13,7 @@ public enum MIDIFileDecodeError: LocalizedError {
     case fileReadError
     case malformed(_ verboseError: String)
     case notImplemented
-    
+
     public var errorDescription: String? {
         switch self {
         case .fileNotFound:

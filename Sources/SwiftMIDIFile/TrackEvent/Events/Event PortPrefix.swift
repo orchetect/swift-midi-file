@@ -1,12 +1,12 @@
 //
 //  Event PortPrefix.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - MIDIPortPrefix
 
@@ -25,9 +25,9 @@ extension MIDIFileEvent {
     public struct PortPrefix {
         /// Port number (`0 ... 127`)
         public var port: UInt7 = 0
-        
+
         // MARK: - Init
-        
+
         public init(port: UInt7) {
             self.port = port
         }
@@ -76,18 +76,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.PortPrefix {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x21, 0x01] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x21, 0x01]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.PortPrefix: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .portPrefix }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .portPrefix
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .portPrefix(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -102,7 +106,7 @@ extension MIDIFileEvent.PortPrefix: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readPortNumber: UInt8
         do throws(MIDIFileDecodeError) {
@@ -113,18 +117,18 @@ extension MIDIFileEvent.PortPrefix: MIDIFileEventPayload {
                 else {
                     throw .malformed("Port Prefix does not start with expected bytes.")
                 }
-                
+
                 let readPortNumber = try parser.toMIDIFileDecodeError(
                     malformedReason: "Port Prefix port number byte is missing.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
-                
+
                 return readPortNumber
             }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard (0x0 ... 0x7F).contains(readPortNumber) else {
@@ -132,15 +136,15 @@ extension MIDIFileEvent.PortPrefix: MIDIFileEventPayload {
                     "Port Prefix port number is out of bounds: \(readPortNumber)"
                 )
             }
-            
+
             guard let portNumber = readPortNumber.toUInt7Exactly else {
                 throw .malformed(
                     "Port Prefix value(s) are out of bounds."
                 )
             }
-            
+
             let newEvent = Self(port: portNumber)
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: requiredStreamByteCount
@@ -153,18 +157,18 @@ extension MIDIFileEvent.PortPrefix: MIDIFileEventPayload {
             )
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 21 01 pp
         // pp is port number (0...127 assumably)
-        
+
         D(Self.prefixBytes + [port.uInt8Value])
     }
-    
+
     public var midiFileDescription: String {
         "port:\(port)"
     }
-    
+
     public var midiFileDebugDescription: String {
         "PortPrefix(\(port))"
     }

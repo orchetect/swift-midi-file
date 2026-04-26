@@ -1,6 +1,6 @@
 //
 //  Data+MIDI1File.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -13,34 +13,34 @@ extension MutableDataProtocol {
     init(midi1FileVariableLengthValue number: some BinaryInteger) {
         var result = Self()
         var count = 0
-        
+
         var parseNum = number
-        
+
         guard parseNum > 0 else {
             self = Self([0x00])
             return
         }
-        
+
         while parseNum > 0 {
             if (result.count - 1) < count {
                 // increase size of array as needed
                 result.insert(0x00, at: result.startIndex)
             }
-            
+
             // Get lowest 7 bits of current data
             result[result.startIndex] = Self.Element(parseNum & 0x7F)
-            
+
             // shift by 7 bits
             parseNum = parseNum >> 7
-            
+
             if count > 0 { // not least significant byte?
                 // set a flag on the byte
                 result[result.startIndex] = result[result.startIndex] | 0x80
             }
-            
+
             count += 1 // count up for next byte
         }
-        
+
         self = result
     }
 }
@@ -50,7 +50,7 @@ extension MutableDataProtocol {
         // Variable length delta timestamp representing the number of ticks that have elapsed
         // According to the Standard MIDI File 1.0 Spec, the entire delta-time should be at most 4
         // bytes long.
-        
+
         append(contentsOf: Self(midi1FileVariableLengthValue: ticks))
     }
 }
@@ -63,17 +63,17 @@ extension DataProtocol {
     /// Currently returns nil if value overflows a 28-bit unsigned value.
     func midi1FileVariableLengthValue() -> (value: Int, byteLength: Int)? {
         let uInt28Max = 0b1111_11111111_11111111_11111111
-        
+
         var result = 0 // don't cast as UInt32 yet, we need room to check for overflow
-        
+
         var parsedByteCount = 0
-        
+
         if count < 1 { return nil }
-        
+
         func countAsIndex() -> Self.Index {
             index(startIndex, offsetBy: parsedByteCount)
         }
-        
+
         // while flag bit is set
         while parsedByteCount < count,
               self[countAsIndex()] & 0x80 > 0,
@@ -81,25 +81,25 @@ extension DataProtocol {
         {
             result = result << 7
             result = result | (Int(self[countAsIndex()]) & 0x7F)
-            
+
             // validation check: if we overflow, return nil - input data may be malformed
             if result > uInt28Max { return nil }
-            
+
             parsedByteCount += 1
         }
-        
+
         guard parsedByteCount < count else {
             // malformed
             return nil
         }
-        
+
         // get last byte (the one without the flag bit set)
         result = result << 7
         result = result | (Int(self[countAsIndex()]) & 0x7F)
-        
+
         // validation check: if we overflow, return nil - input data may be malformed
         if result > uInt28Max { return nil }
-        
+
         return (value: Int(result), byteLength: parsedByteCount + 1)
     }
 }

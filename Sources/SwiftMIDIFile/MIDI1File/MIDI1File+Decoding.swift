@@ -1,6 +1,6 @@
 //
 //  MIDI1File+Decoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -19,9 +19,9 @@ extension MIDI1File {
         predicate: DecodePredicate? = nil
     ) throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
-        
+
         header = parser.fileDescriptor.header
-        
+
         let parsedChunks = try parser.chunks(
             options: options,
             predicate: predicate
@@ -37,9 +37,9 @@ extension MIDI1File {
         predicate: DecodePredicate? = nil
     ) async throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
-        
+
         header = parser.fileDescriptor.header
-        
+
         // TODO: Workaround for Swift 6.1 compiler bug which prevents us from using throws(MIDIFileDecodeError) on chunks(), but would work in 6.2+
         do {
             let parsedChunks = try await parser.chunks(
@@ -70,9 +70,9 @@ extension MIDI1File {
         parsedChunk: @escaping ChunkDecodeBlock
     ) async throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
-        
+
         header = parser.fileDescriptor.header
-        
+
         let parsedChunks: [Int: AnyChunk] = await withTaskGroup(of: Void.self, returning: [Int: AnyChunk].self) { group in
             var parsedChunks: [Int: AnyChunk] = [:]
             for await (chunkIndex, result) in parser.chunksAsyncSequence(
@@ -88,15 +88,15 @@ extension MIDI1File {
                         result
                     )
                 }
-                
+
                 // grab chunk for local storage
                 if let chunk = try? result.get() { parsedChunks[chunkIndex] = chunk }
             }
-            
+
             await group.waitForAll()
             return parsedChunks
         }
-        
+
         chunks = Array(parsedChunks.sorted(by: { $0.key < $1.key }).map(\.value))
     }
 }

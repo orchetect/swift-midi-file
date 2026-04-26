@@ -1,12 +1,12 @@
 //
 //  Event AnyTempo.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - AnyTempo
 
@@ -47,7 +47,7 @@ extension MIDIFileEvent.AnyTempo {
     public init(_ tempo: MIDIFileEvent.MusicalTempo) {
         self = .musical(tempo)
     }
-    
+
     public init(_ tempo: MIDIFileEvent.SMPTETempo) {
         self = .smpte(tempo)
     }
@@ -61,7 +61,7 @@ extension MIDIFileEvent.AnyTempo {
 
 extension MIDIFileEvent.AnyTempo: MIDIFileEvent.Tempo {
     public typealias Timebase = AnyMIDIFileTimebase
-    
+
     public var microsecondsPerQuarter: UInt32 {
         get {
             switch self {
@@ -80,7 +80,7 @@ extension MIDIFileEvent.AnyTempo: MIDIFileEvent.Tempo {
             }
         }
     }
-    
+
     public init(microsecondsPerQuarter: UInt32) {
         // just default to musical timebase as it's by far the most common
         // TODO: this is a bit wonky but our hands are kind of tied with all the type erasure
@@ -94,14 +94,14 @@ extension MIDIFileEvent.AnyTempo: MIDIFileEventPayload {
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .tempo(self)
     }
-    
+
     public var midiFileDescription: String {
         switch self {
         case let .musical(tempo): tempo.midiFileDescription
         case let .smpte(tempo): tempo.midiFileDescription
         }
     }
-    
+
     public var midiFileDebugDescription: String {
         "AnyTempo(\(midiFileDescription))"
     }

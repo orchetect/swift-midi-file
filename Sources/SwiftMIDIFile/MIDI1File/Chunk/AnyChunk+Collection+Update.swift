@@ -1,12 +1,12 @@
 //
 //  AnyChunk+Collection+Update.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
 
 extension Array {
     /// Updates tracks in-place with new tracks. If the number of tracks differ, outstanding tracks will be
@@ -16,7 +16,7 @@ extension Array {
     ) where Element == MIDI1File<Timebase>.AnyChunk {
         let oldTracksIndices = trackIndices()
         let newTracksIndices = newTracks.indices
-        
+
         // determine list of operations
         var operations: [UpdateTrackOperation] = []
         for (oldIndex, newIndex) in optionalZip(oldTracksIndices, newTracksIndices) {
@@ -33,19 +33,19 @@ extension Array {
                 // both are nil, which should never happen, but ignore anyways
             }
         }
-        
+
         // sort operations
         operations = operations.sortedForExecution()
-        
+
         // commit operations
         for operation in operations {
             switch operation {
             case let .replace(oldIndex: oldIndex, withNewTracksIndex: newIndex):
                 self[oldIndex] = .track(newTracks[newIndex])
             case let .append(fromNewTracksIndex: newIndex):
-                self.append(.track(newTracks[newIndex]))
+                append(.track(newTracks[newIndex]))
             case let .remove(oldIndex: oldIndex):
-                self.remove(at: oldIndex)
+                remove(at: oldIndex)
             }
         }
     }
@@ -55,11 +55,19 @@ private enum UpdateTrackOperation {
     case replace(oldIndex: Int, withNewTracksIndex: Int)
     case append(fromNewTracksIndex: Int)
     case remove(oldIndex: Int)
-    
-    var isReplace: Bool { guard case .replace = self else { return false }; return true }
-    var isAppend: Bool { guard case .append = self else { return false }; return true }
-    var isRemove: Bool { guard case .remove = self else { return false }; return true }
-    
+
+    var isReplace: Bool {
+        guard case .replace = self else { return false }; return true
+    }
+
+    var isAppend: Bool {
+        guard case .append = self else { return false }; return true
+    }
+
+    var isRemove: Bool {
+        guard case .remove = self else { return false }; return true
+    }
+
     var sortValue: Int {
         switch self {
         case .replace: 0

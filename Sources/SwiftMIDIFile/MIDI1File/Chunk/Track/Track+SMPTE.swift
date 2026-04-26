@@ -1,6 +1,6 @@
 //
 //  Track+SMPTE.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,7 +11,7 @@ import SwiftTimecodeCore
 extension MIDI1File.Track where Timebase == SMPTEMIDIFileTimebase {
     /// Returns ``events`` mapped to their SMPTE timecode locations.
     /// Ensure the frame rate and `ticksPerFrame` value are the same values specified in the MIDI file header.
-    /// 
+    ///
     /// This is computed each time this method is called, so avoid repeated calls to this method where possible.
     ///
     /// - Parameters:
@@ -36,7 +36,7 @@ extension MIDI1File.Track where Timebase == SMPTEMIDIFileTimebase {
                 Timecode(.zero, at: timebase.frameRate.timecodeRate)
             }
         }
-        
+
         var position: Timecode = origin
         return events.map {
             let interval = $0.delta

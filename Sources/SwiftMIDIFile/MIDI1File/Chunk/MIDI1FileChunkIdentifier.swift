@@ -1,6 +1,6 @@
 //
 //  MIDI1FileChunkIdentifier.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -14,7 +14,7 @@ public struct MIDI1FileChunkIdentifier {
     /// For standard MIDI tracks, this is `MTrk`.
     /// For non-track chunks, any 4-character identifier can be used except for `MTrk` or `MThd`.
     public let string: String
-    
+
     /// Internal init.
     init(unsafe string: String) {
         assert(string.count == 4)
@@ -55,7 +55,7 @@ extension MIDI1FileChunkIdentifier {
         }
         self.string = string
     }
-    
+
     /// Initialize from an undefined (non-standard) 4-character ASCII chunk identifier.
     /// This identifier must be different from the header identifier (`MThd`) and the track identifier (`MTrk`).
     ///
@@ -69,7 +69,7 @@ extension MIDI1FileChunkIdentifier {
         }
         self = id
     }
-    
+
     /// Internal lossy non-failable init.
     init(lossy string: String) {
         if let validated = Self(string: string) {

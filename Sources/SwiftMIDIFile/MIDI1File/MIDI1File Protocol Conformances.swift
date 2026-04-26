@@ -1,6 +1,6 @@
 //
 //  MIDI1File Protocol Conformances.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,7 +11,7 @@ extension MIDI1File: Equatable {
         lhs.header == rhs.header &&
             lhs.chunks == rhs.chunks
     }
-    
+
     /// Returns `true` if the content of the MIDI file is equal to another MIDI file.
     /// (Omits ``id`` properties of chunks and track events from the comparison.)
     public func isEqual(to other: Self) -> Bool {
@@ -35,7 +35,7 @@ extension MIDI1File: CustomStringConvertible {
     public var description: String {
         description(maxEventCount: 10) // by default, limit number of events
     }
-    
+
     /// Generate a description of the track, optionally limiting the number of events from each track in the output.
     public func description(maxEventCount: Int?) -> String {
         descriptionBuilder(
@@ -55,7 +55,7 @@ extension MIDI1File: CustomDebugStringConvertible {
     public var debugDescription: String {
         debugDescription(maxEventCount: 10) // by default, limit number of events
     }
-    
+
     /// Generate a debug description of the track, optionally limiting the number of events from each track in the output.
     public func debugDescription(maxEventCount: Int?) -> String {
         descriptionBuilder(
@@ -78,23 +78,23 @@ extension MIDI1File {
         chunkDesc: (_ chunk: AnyChunk) -> String
     ) -> String {
         var outputString = ""
-        
+
         outputString += "MIDI1File(\n"
         outputString += "  format: \(formatDesc(format))\n"
         outputString += "  timebase: \(timebaseDesc(timebase))\n"
         outputString += "  chunks (\(chunks.count)): \n"
-        
+
         for chunk in chunks.enumerated() {
             let chunkDebugDesc = chunkDesc(chunk.element)
-            
+
             // indent each line with additional spaces
             outputString += "#\(chunk.offset + 1): \(chunkDebugDesc)"
                 .split(separator: "\n")
                 .reduce("") { $0 + "    \($1)\n" }
         }
-        
+
         outputString += ")"
-        
+
         return outputString
     }
 }

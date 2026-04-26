@@ -1,6 +1,6 @@
 //
 //  MusicalMIDIFileDeltaTime.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -8,31 +8,31 @@
 public enum MusicalMIDIFileDeltaTime {
     /// Construct delta time of a whole note.
     case noteWhole
-    
+
     /// Construct delta time of a half note.
     case noteHalf
-    
+
     /// Construct delta time of a quarter note.
     case noteQuarter
-    
+
     /// Construct delta time of a 8th note.
     case note8th(triplet: Bool)
-    
+
     /// Construct delta time of a 16th note.
     case note16th(triplet: Bool)
-    
+
     /// Construct delta time of a 32nd note.
     case note32nd(triplet: Bool)
-    
+
     /// Construct delta time of a 64th note.
     case note64th(triplet: Bool)
-    
+
     /// Construct delta time of a 128th note.
     case note128th(triplet: Bool)
-    
+
     /// Construct delta time of a 256th note.
     case note256th(triplet: Bool)
-    
+
     /// Construct delta time in beats (quarter-notes) as a floating-point value.
     /// The `ppq` (ticks per quarter note) value must match the value in the MIDI file header.
     ///
@@ -50,7 +50,7 @@ public enum MusicalMIDIFileDeltaTime {
     /// > using this constructor, as floating-point beat values cannot naturally express perfect
     /// > divisions of 3 (0.33333... repeating) and may introduce cumulative rounding errors.
     case beats(_ beats: Double)
-    
+
     case ticks(_ ticks: UInt32)
 }
 
@@ -94,7 +94,7 @@ extension MusicalMIDIFileDeltaTime: CustomStringConvertible {
 
 extension MusicalMIDIFileDeltaTime: MIDIFileDeltaTime {
     public typealias Timebase = MusicalMIDIFileTimebase
-    
+
     public func ticks(using timebase: Timebase) -> UInt32 {
         switch self {
         case .noteWhole:
@@ -127,24 +127,36 @@ extension MusicalMIDIFileDeltaTime: MIDIFileDeltaTime {
 
 extension MusicalMIDIFileDeltaTime {
     // MARK: Defaulted Parameter Overloads
-    
+
     /// Construct delta time of a 8th note.
-    public static var note8th: Self { .note8th(triplet: false) }
-    
+    public static var note8th: Self {
+        .note8th(triplet: false)
+    }
+
     /// Construct delta time of a 16th note.
-    public static var note16th: Self { .note16th(triplet: false) }
-    
+    public static var note16th: Self {
+        .note16th(triplet: false)
+    }
+
     /// Construct delta time of a 32nd note.
-    public static var note32nd: Self { .note32nd(triplet: false) }
-    
+    public static var note32nd: Self {
+        .note32nd(triplet: false)
+    }
+
     /// Construct delta time of a 64th note.
-    public static var note64th: Self { .note64th(triplet: false) }
-    
+    public static var note64th: Self {
+        .note64th(triplet: false)
+    }
+
     /// Construct delta time of a 128th note.
-    public static var note128th: Self { .note128th(triplet: false) }
-    
+    public static var note128th: Self {
+        .note128th(triplet: false)
+    }
+
     /// Construct delta time of a 256th note.
-    public static var note256th: Self { .note256th(triplet: false) }
+    public static var note256th: Self {
+        .note256th(triplet: false)
+    }
 }
 
 // MARK: - Methods

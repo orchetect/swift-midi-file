@@ -1,12 +1,12 @@
 //
 //  MIDI1File init.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
 
 // MARK: - Init: Raw Data
 
@@ -26,7 +26,7 @@ extension MIDI1File {
         let url = try AnyMIDI1File.url(forFilePath: path)
         try self.init(url: url, options: options, predicate: predicate)
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
@@ -37,7 +37,7 @@ extension MIDI1File {
         let url = try AnyMIDI1File.url(forFilePath: path)
         try await self.init(url: url, options: options, predicate: predicate)
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     /// As each chunk completes parsing, a closure is called with the parsing results and the chunk's content.
     ///
@@ -73,7 +73,7 @@ extension MIDI1File {
             predicate: predicate
         )
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
@@ -88,7 +88,7 @@ extension MIDI1File {
             predicate: predicate
         )
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     /// As each chunk completes parsing, a closure is called with the parsing results and the chunk's content.
     ///

@@ -1,6 +1,6 @@
 //
 //  MIDIFileEvent.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -14,10 +14,10 @@ public enum MIDIFileEvent {
     //   - MIDIFileEvent concrete payload structs (`KeySignature`, etc.)
     //   - DocC documentation for each MIDIFileEvent type
     // ------------------------------------
-    
+
     /// Channel Voice Message: Control Change (CC)
     case cc(CC)
-    
+
     /// MIDI Channel Prefix event.
     ///
     /// > Standard MIDI File 1.0 Spec:
@@ -29,7 +29,7 @@ public enum MIDIFileEvent {
     /// > help jam several tracks into a format 0 file, keeping their non-MIDI data associated with
     /// > a track. This capability is also present in Yamaha's ESEQ file format.
     case channelPrefix(ChannelPrefix)
-    
+
     /// Key Signature event.
     ///
     /// For a format 1 MIDI file, Key Signature Meta events should only occur within the first
@@ -37,13 +37,13 @@ public enum MIDIFileEvent {
     ///
     /// If there are no key signature events in a MIDI file, C major is assumed.
     case keySignature(KeySignature)
-    
+
     /// Channel Voice Message: Note Off
     case noteOff(NoteOff)
-    
+
     /// Channel Voice Message: Note On
     case noteOn(NoteOn)
-    
+
     /// Channel Voice Message: Note Pressure (Polyphonic Aftertouch)
     ///
     /// Also known as:
@@ -51,16 +51,16 @@ public enum MIDIFileEvent {
     /// - Logic Pro: "Polyphonic Aftertouch"
     /// - Cubase: "Poly Pressure"
     case notePressure(NotePressure)
-    
+
     /// Channel Voice Message: Pitch Bend
     case pitchBend(PitchBend)
-    
+
     /// MIDI Port Prefix event.
     ///
     /// Specifies out of which MIDI Port (ie, buss) the MIDI events in the MIDI track go.
     /// The data byte is the port number, where 0 would be the first MIDI buss in the system.
     case portPrefix(PortPrefix)
-    
+
     /// Channel Voice Message: Channel Pressure (Aftertouch)
     ///
     /// Also known as:
@@ -68,22 +68,22 @@ public enum MIDIFileEvent {
     /// - Logic Pro: "Aftertouch"
     /// - Cubase: "Aftertouch"
     case pressure(Pressure)
-    
+
     /// Channel Voice Message: Program Change
     ///
     /// > Note: When decoding, bank information is not decoded as part of the Program Change event
     /// > but will be decoded as individual CC messages. This may be addressed in a future release
     /// > of SwiftMIDI.
     case programChange(ProgramChange)
-    
+
     /// Channel Voice Message: RPN (Registered Parameter Number),
     /// also referred to as Registered Controller in MIDI 2.0.
     case rpn(RPN)
-    
+
     /// Channel Voice Message: NRPN (Non-Registered Parameter Number),
     /// also referred to as Assignable Controller in MIDI 2.0.
     case nrpn(NRPN)
-    
+
     /// Sequence Number event.
     ///
     /// - For MIDI file type 0/1, this should only be on the first track. This is used to identify
@@ -92,11 +92,11 @@ public enum MIDIFileEvent {
     ///
     /// - For MIDI file type 2, each track can contain a sequence number event.
     case sequenceNumber(SequenceNumber)
-    
+
     /// Sequencer-specific data.
     /// Typically begins with a 1 or 3 byte manufacturer ID, similar to SysEx.
     case sequencerSpecific(SequencerSpecific)
-    
+
     /// Specify the SMPTE time at which the track is to start.
     /// This optional event, if present, should occur at the start of a track,
     /// at `time == 0`, and prior to any MIDI events.
@@ -107,10 +107,10 @@ public enum MIDIFileEvent {
     /// > MIDI SMPTE Offset subframes (fractional frames) are always in 100ths of a frame, even in
     /// > SMPTE-based tracks which specify a different frame subdivision for delta-times.
     case smpteOffset(SMPTEOffset)
-    
+
     /// System Exclusive: Manufacturer-specific (7-bit)
     case sysEx7(SysEx7)
-    
+
     /// Universal System Exclusive (7-bit)
     ///
     /// Some standard Universal System Exclusive messages have been defined by the MIDI Spec. See
@@ -118,12 +118,12 @@ public enum MIDIFileEvent {
     ///
     /// - `deviceID` of `0x7F` indicates "All Devices".
     case universalSysEx7(UniversalSysEx7)
-    
+
     /// Tempo event.
     /// For a format 1 MIDI file, Tempo events should only occur within the first `MTrk` chunk.
     /// If there are no tempo events in a MIDI file, 120 bpm is assumed.
     case tempo(AnyTempo)
-    
+
     /// Text event.
     /// Includes copyright, marker, cue point, track/sequence name, instrument name, generic text,
     /// program name, device name, or lyric.
@@ -131,13 +131,13 @@ public enum MIDIFileEvent {
     /// Text is restricted to ASCII format only. If extended characters or encodings are used, it
     /// will be converted to ASCII lossily before encoding into the MIDI file.
     case text(Text)
-    
+
     /// Time Signature event.
     /// For a format 1 MIDI file, Time Signature meta events should only occur within the first
     /// `MTrk` chunk.
     /// If there are no Time Signature events in a MIDI file, 4/4 is assumed.
     case timeSignature(TimeSignature)
-    
+
     /// Unrecognized Meta Event.
     ///
     /// > Note: This is not designed to be instanced, but is instead a placeholder for unrecognized
@@ -160,7 +160,7 @@ public enum MIDIFileEvent {
     /// > SysEx events and meta-events cancel any running status which was in effect. Running status
     /// > does not apply to and may not be used for these messages.
     case unrecognizedMeta(UnrecognizedMeta)
-    
+
     /// XMF Patch Type Prefix event.
     ///
     /// > Standard MIDI File 1.0 Spec:

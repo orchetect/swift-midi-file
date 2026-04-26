@@ -1,12 +1,12 @@
 //
 //  Event SysEx.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - SysEx7
 
@@ -38,7 +38,7 @@ extension MIDIFileEvent {
         )
         return .sysEx7(event)
     }
-    
+
     /// System Exclusive: Manufacturer-specific (7-bit)
     @_disfavoredOverload
     public static func sysEx7(
@@ -68,7 +68,7 @@ extension MIDI1File.Track.Event {
         )
         return Self(delta: delta, event: event)
     }
-    
+
     /// System Exclusive: Manufacturer-specific (7-bit)
     @_disfavoredOverload
     public static func sysEx7(
@@ -87,12 +87,14 @@ extension MIDI1File.Track.Event {
 // MARK: - SysEx7 Encoding
 
 extension MIDIEvent.SysEx7: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .sysEx7 }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .sysEx7
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .sysEx7(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -105,10 +107,10 @@ extension MIDIEvent.SysEx7: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         do throws(MIDIFileDecodeError) {
             let (parsedEvent, byteLength) = try MIDIEvent.sysEx7(midi1FileRawBytes: stream)
-            
+
             switch parsedEvent {
             case let .sysEx7(sysEx):
                 return .event(payload: sysEx, byteLength: byteLength)
@@ -121,29 +123,29 @@ extension MIDIEvent.SysEx7: MIDIFileEventPayload {
             return .unrecoverableError(error: error)
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // F0 variable_length(of message including trailing F7) message
         // The system exclusive message:
         //   F0 7E 00 09 01 F7
         // would be encoded as:
         //   F0 05 7E 00 09 01 F7
-        
+
         let msg = midi1RawBytes(leadingF0: false, trailingF7: false)
-        
+
         return [0xF0]
             + D(midi1FileVariableLengthValue: msg.count + 1)
             + D(msg)
             + [0xF7]
     }
-    
+
     public var midiFileDescription: String {
         "sysEx7: \((midi1FileRawBytes() as Data).count) bytes"
     }
 
     public var midiFileDebugDescription: String {
         let bytes = midi1FileRawBytes(as: [UInt8].self)
-        
+
         let byteDump = bytes
             .hexString(padEachTo: 2, prefixes: true, separator: ", ")
 
@@ -197,7 +199,7 @@ extension MIDIFileEvent {
         )
         return .universalSysEx7(event)
     }
-    
+
     /// Universal System Exclusive (7-bit)
     ///
     /// Some standard Universal System Exclusive messages have been defined by the MIDI Spec. See
@@ -249,7 +251,7 @@ extension MIDI1File.Track.Event {
         )
         return Self(delta: delta, event: event)
     }
-    
+
     /// Universal System Exclusive (7-bit)
     ///
     /// Some standard Universal System Exclusive messages have been defined by the MIDI Spec. See
@@ -279,12 +281,14 @@ extension MIDI1File.Track.Event {
 // MARK: - UniversalSysEx7 Encoding
 
 extension MIDIEvent.UniversalSysEx7: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .universalSysEx7 }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .universalSysEx7
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .universalSysEx7(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -297,10 +301,10 @@ extension MIDIEvent.UniversalSysEx7: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         do throws(MIDIFileDecodeError) {
             let (parsedEvent, byteLength) = try MIDIEvent.sysEx7(midi1FileRawBytes: stream)
-            
+
             switch parsedEvent {
             case let .universalSysEx7(universalSysEx):
                 return .event(payload: universalSysEx, byteLength: byteLength)
@@ -313,32 +317,32 @@ extension MIDIEvent.UniversalSysEx7: MIDIFileEventPayload {
             return .unrecoverableError(error: error)
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // F0 variable_length(of message including trailing F7) message
         // The system exclusive message:
         //   F0 7E 00 09 01 F7
         // would be encoded as:
         //   F0 05 7E 00 09 01 F7
-        
+
         let msg = midi1RawBytes(leadingF0: false, trailingF7: false)
-        
+
         return [0xF0]
             + D(midi1FileVariableLengthValue: msg.count + 1)
             + msg
             + [0xF7]
     }
-    
+
     public var midiFileDescription: String {
         "universalSysEx7: \((midi1FileRawBytes() as Data).count) bytes"
     }
-    
+
     public var midiFileDebugDescription: String {
         let bytes = midi1FileRawBytes(as: [UInt8].self)
-        
+
         let byteDump = bytes
             .hexString(padEachTo: 2, prefixes: true, separator: ", ")
-        
+
         return "UniversalSysEx7(\(bytes.count) bytes: [\(byteDump)]"
     }
 }
@@ -353,7 +357,7 @@ extension MIDIEvent {
         guard rawBytes.count >= 3 else {
             throw .malformed("SysEx does not have enough bytes.")
         }
-        
+
         return try rawBytes.withDataParser { parser throws(MIDIFileDecodeError) in
             // 1-byte preamble
             guard (try? parser.readByte()) == 0xF0 else {
@@ -361,30 +365,30 @@ extension MIDIEvent {
                     "Event is not a SysEx event."
                 )
             }
-            
+
             let length = try parser.midi1FileVariableLengthValue()
-            
+
             let sysExBodySlice = try parser.toMIDIFileDecodeError(
                 malformedReason: "SysEx data does not have enough bytes.",
-                try parser.read(bytes: length)
+                parser.read(bytes: length)
             )
-            
+
             guard let lastByte = sysExBodySlice.last else {
                 throw .malformed(
                     "SysEx data did not have enough bytes when attempting to read termination byte."
                 )
             }
-            
+
             guard lastByte == 0xF7 else {
                 throw .malformed(
                     "Expected SysEx termination byte 0xF7 but found \(lastByte.hexString(padTo: 2, prefix: true)) instead."
                 )
             }
-            
+
             let sysExFullSlice = [0xF0] + sysExBodySlice
-            
+
             let byteLength = parser.readOffset
-            
+
             do throws(MIDIEvent.ParseError) {
                 let payload = try MIDIEvent.sysEx7(rawBytes: sysExFullSlice)
                 return (payload: payload, byteLength: byteLength)

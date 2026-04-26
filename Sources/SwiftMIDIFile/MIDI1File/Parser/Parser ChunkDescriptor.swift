@@ -1,6 +1,6 @@
 //
 //  Parser ChunkDescriptor.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -8,13 +8,13 @@ extension MIDI1File.Parser {
     struct ChunkDescriptor {
         /// Chunk type (4-character identifier).
         var identifier: MIDI1FileChunkIdentifier
-        
+
         /// Byte offset of the start of the chunk.
         var startOffset: Int
-        
+
         /// Byte offset of the body (data portion) of the chunk (after the chunk type and length bytes).
         var bodyByteStartOffset: Int
-        
+
         /// Byte length (count) of the body (data portion) of the chunk (after the chunk type and length bytes).
         var bodyByteLength: Int
     }

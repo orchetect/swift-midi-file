@@ -1,18 +1,18 @@
 //
 //  Header+Decoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
-internal import SwiftDataParsing
 
 extension MIDI1File.Header {
     /// Init from MIDI file header data.
-    static func decode<D: DataProtocol>(
-        midi1FileRawBytes: D,
+    static func decode(
+        midi1FileRawBytes: some DataProtocol,
         allowMultiTrackFormat0: Bool
     ) throws(MIDIFileDecodeError) -> (header: Self, trackCount: Int) {
         try Timebase.decodeMIDI1FileHeader(
@@ -20,10 +20,10 @@ extension MIDI1File.Header {
             allowMultiTrackFormat0: allowMultiTrackFormat0
         )
     }
-    
+
     /// Init from MIDI file data stream.
-    static func decode<D: DataProtocol>(
-        midi1FileRawBytesStream stream: D,
+    static func decode(
+        midi1FileRawBytesStream stream: some DataProtocol,
         allowMultiTrackFormat0: Bool
     ) throws(MIDIFileDecodeError) -> (header: Self, trackCount: Int, bufferLength: Int) {
         try Timebase.decodeMIDI1FileHeader(

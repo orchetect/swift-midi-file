@@ -1,18 +1,18 @@
 //
 //  Track+Decoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 extension MIDI1File.Track {
     /// Init from MIDI file data stream.
     /// If the initializer returns `nil`, discard the track without throwing an error.
-    public init?<D: DataProtocol>(
-        midi1FileRawBytesStream stream: D,
+    public init?(
+        midi1FileRawBytesStream stream: some DataProtocol,
         timebase: Timebase,
         options: MIDI1FileChunkDecodeOptions
     ) throws(MIDIFileDecodeError) {
@@ -21,15 +21,15 @@ extension MIDI1File.Track {
                 "There was a problem reading chunk header. Encountered end of file early."
             )
         }
-        
+
         // track header
-        
+
         let track: Self? = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
             let identifierString = try parser.toMIDIFileDecodeError(
                 malformedReason: "Missing chunk type bytes.",
-                try parser.read(bytes: 4).asciiDataToString() ?? "????"
+                parser.read(bytes: 4).asciiDataToString() ?? "????"
             )
-        
+
             guard let chunkLengthInt32 = (try? parser.read(bytes: 4))?
                 .toUInt32(from: .bigEndian)
             else {
@@ -38,25 +38,25 @@ extension MIDI1File.Track {
                 )
             }
             let chunkLength = Int(chunkLengthInt32)
-            
+
             guard identifierString == Self.identifier.string else {
                 throw .malformed(
                     "Chunk header does not contain track header identifier. Found \(identifierString.quoted) instead."
                 )
             }
-        
+
             guard parser.remainingByteCount >= chunkLength else {
                 throw .malformed(
                     "There was a problem reading track data blob. Encountered end of data early."
                 )
             }
-            
+
             guard let readChunk = try? parser.read(bytes: chunkLength) else {
                 throw .malformed(
                     "There was a problem reading track data blob. Encountered end of data early."
                 )
             }
-            
+
             // we can't pass pointer ranges outside of the data reader closure,
             // so we must use them within the closure
             return try Self(
@@ -65,68 +65,68 @@ extension MIDI1File.Track {
                 options: options
             )
         }
-        
+
         if let track { self = track } else { return nil }
     }
-    
+
     /// Init from raw data stream, excluding the header identifier and length.
     /// If the initializer returns `nil`, discard the track without throwing an error.
-    init?<D: DataProtocol>(
-        midi1FileRawBytes rawData: D,
+    init?(
+        midi1FileRawBytes rawData: some DataProtocol,
         timebase: Timebase,
         options: MIDI1FileChunkDecodeOptions
     ) throws(MIDIFileDecodeError) {
         // sanitize inputs
         let maxEventCount = options.maxEventCount?.clamped(to: 0...)
-        
+
         // chunk data
-        
+
         let track: Self? = try rawData.withDataParser { parser throws(MIDIFileDecodeError) in
             // events
-            
+
             var endOfChunk = false
             var newEvents: [Event] = []
             var deltaTimeBeforeEndOfTrack: DeltaTime = .none
-            
+
             // running status
-            
+
             var parsedEventCount = 0
             var runningStatusByte: UInt8?
-            
+
             do throws(MIDIFileDecodeError) {
                 while !endOfChunk {
                     // check for early return if event count is being limited
                     if let maxEventCount, parsedEventCount >= maxEventCount { break }
-                    
+
                     // delta time
-                    
+
                     let eventDeltaTimeRead = try parser.toMIDIFileDecodeError(
                         malformedReason: "Encountered end of file early.",
-                        try parser.read(bytes: 4, advance: false)
+                        parser.read(bytes: 4, advance: false)
                     )
-                    
+
                     guard let eventDeltaTime = eventDeltaTimeRead.midi1FileVariableLengthValue()
                     else {
                         throw .malformed(
                             "Delta time variable length value could not be read and may be malformed."
                         )
                     }
-                    
-                    try parser.toMIDIFileDecodeError(try parser.seek(by: eventDeltaTime.byteLength))
-                    
+
+                    try parser.toMIDIFileDecodeError(parser.seek(by: eventDeltaTime.byteLength))
+
                     // event
-                    
+
                     let readBuffer = try parser.toMIDIFileDecodeError(
                         malformedReason: "Encountered end of file early.",
-                        try parser.read(advance: false)
+                        parser.read(advance: false)
                     )
-                    
+
                     guard !readBuffer.isEmpty else {
                         throw .malformed("Encountered end of file early.")
                     }
-                    
+
                     // first check for end of track
-                    
+
                     if readBuffer.count == Self.trackEndByes.count,
                        readBuffer.elementsEqual(Self.trackEndByes)
                     {
@@ -134,15 +134,15 @@ extension MIDI1File.Track {
                         deltaTimeBeforeEndOfTrack = .ticks(UInt32(eventDeltaTime.value))
                         break
                     }
-                    
+
                     // status
-                    
+
                     let isStatusBytePresent = readBuffer[0] >= 0x80
-                    
+
                     // parse out next event
-                    
+
                     var foundEvent: (newEvent: (any MIDIFileEventPayload)?, bufferLength: Int, statusByte: UInt8)?
-                    
+
                     let effectiveRunningStatus: UInt8? = isStatusBytePresent ? nil : runningStatusByte
                     if let eventType = MIDIFileEventType(
                         atStartOf: readBuffer,
@@ -153,12 +153,13 @@ extension MIDI1File.Track {
                             midi1FileRawBytesStream: readBuffer,
                             runningStatus: effectiveRunningStatus
                         )
-                        
+
                         let statusByte = effectiveRunningStatus ?? readBuffer[0]
-                        
+
                         switch result {
                         case let .event(payload: payload, byteLength: byteLength):
                             foundEvent = (newEvent: payload, bufferLength: byteLength, statusByte: statusByte)
+
                         case let .recoverableError(payload: payload, byteLength: byteLength, error: error):
                             switch options.errorStrategy {
                             case .allowLossyRecovery:
@@ -166,19 +167,19 @@ extension MIDI1File.Track {
                             case .discardTracksWithErrors, .throwOnError:
                                 throw error
                             }
-                            
+
                         case let .unrecoverableError(error: error):
                             throw error
                         }
                     }
-                    
+
                     guard let foundEvent else {
                         // throw an error since no events could be decoded and there are still bytes
                         // remaining in the chunk
-                        
+
                         let byteOffsetString = parser.readOffset
                             .hexString(padTo: 1, prefix: true)
-                        
+
                         let sampleBytes = (1 ... 8)
                             .reduce([UInt8]()) {
                                 // read as many bytes as possible, up to range.count
@@ -188,30 +189,30 @@ extension MIDI1File.Track {
                                 return $0
                             }
                             .hexString(padEachTo: 2, prefixes: true)
-                        
+
                         throw .malformed(
                             "Unexpected data encountered before end of track at track data byte offset \(byteOffsetString) (\(sampleBytes) ...)."
                         )
                     }
-                    
+
                     // inject delta time into event
                     let newEventDelta: DeltaTime = .ticks(UInt32(eventDeltaTime.value))
-                    
+
                     // add new event to new track. if newEvent is nil, it means we are skipping over a malformed event.
                     if let newEvent = foundEvent.newEvent {
                         newEvents.append(Event(delta: newEventDelta, event: newEvent.asMIDIFileEvent()))
                     }
-                    
+
                     // advance parser read offset
-                    try parser.toMIDIFileDecodeError(try parser.seek(by: foundEvent.bufferLength))
-                    
+                    try parser.toMIDIFileDecodeError(parser.seek(by: foundEvent.bufferLength))
+
                     // store event in running status
                     if (0x80 ... 0xEF).contains(foundEvent.statusByte) {
                         runningStatusByte = foundEvent.statusByte
                     } else if (0xF0 ... 0xF7).contains(foundEvent.statusByte) {
                         runningStatusByte = nil
                     }
-                    
+
                     // increment event counter
                     parsedEventCount += 1
                 }
@@ -222,13 +223,14 @@ extension MIDI1File.Track {
                 case .discardTracksWithErrors:
                     return nil
                 case .allowLossyRecovery:
-                    // cease decoding the track, but continue to allow any events that have been decoded so far to be returned without throwing an error
+                    // cease decoding the track, but continue to allow any events that have been decoded so far to be returned without
+                    // throwing an error
                     break
                 }
             }
-            
+
             // bundle RPN and NRPN events
-            
+
             if options.bundleRPNAndNRPNEvents {
                 var eventsIndex = newEvents.startIndex
                 while eventsIndex < newEvents.endIndex {
@@ -236,15 +238,15 @@ extension MIDI1File.Track {
                     eventsIndex += 1
                 }
             }
-            
+
             var track = MIDI1File.Track(events: newEvents)
             track.deltaTimeBeforeEndOfTrack = deltaTimeBeforeEndOfTrack
             return track
         }
-        
+
         if let track { self = track } else { return nil }
     }
-    
+
     static func bundleRPNAndNRPN(
         index eventsIndex: [Event].Index,
         in newEvents: inout [Event],
@@ -252,37 +254,38 @@ extension MIDI1File.Track {
     ) {
         guard newEvents[eventsIndex].event.eventType == .cc
         else { return }
-        
+
         guard case let .cc(msbEvent) = newEvents[eventsIndex].event
         else { return }
-        
+
         guard msbEvent.controller == .rpnMSB || msbEvent.controller == .nrpnMSB
         else { return }
-        
+
         // minimum 3 events required, also prevents crash
         guard newEvents.indices.contains(eventsIndex.advanced(by: 2))
         else { return }
-        
+
         // all CC events
         guard newEvents[eventsIndex ... eventsIndex.advanced(by: 2)]
             .allSatisfy({ $0.event.eventType == .cc })
         else { return }
-        
+
         // same channel
         guard newEvents[eventsIndex ... eventsIndex.advanced(by: 2)]
             .map({ $0.event.midiEvent()?.channel })
             .allSatisfy({ $0 == msbEvent.channel })
         else { return }
-        
+
         let dataEntryLSBIndex = eventsIndex.advanced(by: 3)
         let dataEntryLSB: (
-            delta: DeltaTime, value: UInt7
+            delta: DeltaTime,
+            value: UInt7
         )? = if newEvents.indices.contains(dataEntryLSBIndex),
                 case let .cc(dataEntryLSBCCEvent) = newEvents[dataEntryLSBIndex].event,
                 dataEntryLSBCCEvent.controller == .lsb(for: .dataEntry),
                 dataEntryLSBCCEvent.channel == msbEvent.channel // must match channel
         { (newEvents[dataEntryLSBIndex].delta, dataEntryLSBCCEvent.value.midi1Value) } else { nil }
-        
+
         let eventsSlice = newEvents[eventsIndex ... eventsIndex.advanced(by: 2)]
         let extractedEvents: [(delta: DeltaTime, event: MIDIEvent.CC)] = eventsSlice.compactMap {
             guard case let .cc(e) = $0.event else { return nil }
@@ -292,9 +295,9 @@ extension MIDI1File.Track {
             assertionFailure("Error unwrapping CC events while bundling RPN/NRPN messages. This should never happen.")
             return
         }
-        
+
         let channel = extractedEvents[0].event.channel
-        
+
         let param = UInt7Pair(
             msb: extractedEvents[0].event.value.midi1Value,
             lsb: extractedEvents[1].event.value.midi1Value
@@ -303,9 +306,9 @@ extension MIDI1File.Track {
         let totalDelta: UInt32 = extractedEvents.map(\.delta).reduce(into: 0) {
             $0 += $1.ticks(using: timebase)
         } + (dataEntryLSB?.delta.ticks(using: timebase) ?? 0)
-        
+
         var replacementEvent: Event?
-        
+
         if extractedEvents[0].event.controller == .rpnMSB,
            extractedEvents[1].event.controller == .rpnLSB,
            extractedEvents[2].event.controller == .dataEntry
@@ -329,7 +332,7 @@ extension MIDI1File.Track {
             let midiFileEvent: MIDIFileEvent = .nrpn(midiEvent)
             replacementEvent = Event(delta: .ticks(totalDelta), event: midiFileEvent)
         }
-        
+
         if let replacementEvent {
             let oldEventCount = dataEntryLSB != nil ? 4 : 3
             newEvents.replaceSubrange(

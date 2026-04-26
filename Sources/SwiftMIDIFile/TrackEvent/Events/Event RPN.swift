@@ -1,6 +1,6 @@
 //
 //  Event RPN.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -59,31 +59,33 @@ extension MIDI1File.Track.Event {
 // MARK: - Encoding
 
 extension MIDIEvent.RPN: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .rpn }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .rpn
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .rpn(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
     ) -> MIDIFileEventDecodeResult<Self> {
         // stream parsing is not supported since it involves multiple MIDI file events with delta times
-        return .unrecoverableError(error: .notImplemented)
+        .unrecoverableError(error: .notImplemented)
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         let events = parameter.midi1Events(channel: channel, group: group)
             .map { $0.midi1RawBytes() }
         let packed = events.joined(separator: [0x00]) // add delta time for all events after the first event
         return D(packed)
     }
-    
+
     public var midiFileDescription: String {
         "rpn:\(parameter)\(change == .absolute ? "" : " - relative")"
     }
-    
+
     public var midiFileDebugDescription: String {
         "RPN(" + midiFileDescription + ")"
     }

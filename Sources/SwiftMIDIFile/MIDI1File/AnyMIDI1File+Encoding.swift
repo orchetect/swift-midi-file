@@ -1,6 +1,6 @@
 //
 //  AnyMIDI1File+Encoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -16,7 +16,7 @@ extension AnyMIDI1File {
         case let .smpte(midiFile): try midiFile.rawData()
         }
     }
-    
+
     /// Returns encoded raw MIDI file data.
     /// Throws an error if a problem occurs.
     public func rawData<D: MutableDataProtocol>(as dataType: D.Type) throws(MIDIFileEncodeError) -> D {
@@ -25,7 +25,7 @@ extension AnyMIDI1File {
         case let .smpte(midiFile): try midiFile.rawData(as: dataType)
         }
     }
-    
+
     /// Returns encoded raw MIDI file data, encoding chunks concurrently for improved performance.
     /// Throws an error if a problem occurs.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
@@ -35,7 +35,7 @@ extension AnyMIDI1File {
         case let .smpte(midiFile): try await midiFile.rawData()
         }
     }
-    
+
     /// Returns encoded raw MIDI file data, encoding chunks concurrently for improved performance.
     /// Throws an error if a problem occurs.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)

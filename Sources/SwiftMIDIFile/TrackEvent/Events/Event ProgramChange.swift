@@ -1,12 +1,12 @@
 //
 //  Event ProgramChange.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - ProgramChange
 
@@ -70,12 +70,14 @@ extension MIDI1File.Track.Event {
 // MARK: - Encoding
 
 extension MIDIEvent.ProgramChange: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .programChange }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .programChange
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .programChange(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -90,29 +92,29 @@ extension MIDIEvent.ProgramChange: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readStatus, readChannel, readProgramNumber: UInt8
         do throws(MIDIFileDecodeError) {
             (readStatus, readChannel, readProgramNumber) =
-            try stream.withDataParser { parser throws(MIDIFileDecodeError) -> (UInt8, UInt8, UInt8) in
-                do {
-                    let byte0 = try runningStatus ?? parser.readByte()
-                    let readProgramNumber = try parser.readByte()
-                    
-                    return (
-                        readStatus: (byte0 & 0xF0) >> 4,
-                        readChannel: byte0 & 0x0F,
-                        readProgramNumber: readProgramNumber
-                    )
-                } catch {
-                    throw .malformed("Program Change does not have enough bytes.")
+                try stream.withDataParser { parser throws(MIDIFileDecodeError) -> (UInt8, UInt8, UInt8) in
+                    do {
+                        let byte0 = try runningStatus ?? parser.readByte()
+                        let readProgramNumber = try parser.readByte()
+
+                        return (
+                            readStatus: (byte0 & 0xF0) >> 4,
+                            readChannel: byte0 & 0x0F,
+                            readProgramNumber: readProgramNumber
+                        )
+                    } catch {
+                        throw .malformed("Program Change does not have enough bytes.")
+                    }
                 }
-            }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard readStatus == 0xC else {
@@ -120,13 +122,13 @@ extension MIDIEvent.ProgramChange: MIDIFileEventPayload {
                     "Program Change has invalid status nibble: \(readStatus.hexString(padTo: 1, prefix: true))."
                 )
             }
-            
+
             guard (0 ... 127).contains(readProgramNumber) else {
                 throw .malformed(
                     "Program Change program number is out of bounds: \(readProgramNumber)"
                 )
             }
-            
+
             guard let channel = readChannel.toUInt4Exactly,
                   let programNumber = readProgramNumber.toUInt7Exactly
             else {
@@ -134,15 +136,15 @@ extension MIDIEvent.ProgramChange: MIDIFileEventPayload {
                     "Program Change value(s) are out of bounds."
                 )
             }
-            
+
             // TODO: Should this attempt to decode bank messages that may follow?
-            
+
             let newEvent = Self(
                 program: programNumber,
                 bank: .noBankSelect,
                 channel: channel
             )
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: requiredStreamByteCount
@@ -155,19 +157,19 @@ extension MIDIEvent.ProgramChange: MIDIFileEventPayload {
             )
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // Cn program
-        
+
         D(midi1RawBytes())
     }
-    
+
     public var midiFileDescription: String {
         let chanString = channel.uInt8Value.hexString(padTo: 1, prefix: true)
-        
+
         return "prgm#\(program) chan:\(chanString)"
     }
-    
+
     public var midiFileDebugDescription: String {
         "ProgChange(" + midiFileDescription + ")"
     }

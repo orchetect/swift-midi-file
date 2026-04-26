@@ -1,12 +1,12 @@
 //
 //  Event MusicalTempo.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // ------------------------------------
 // NOTE: When revising these documentation blocks, they are duplicated in:
@@ -21,9 +21,9 @@ extension MIDIFileEvent {
     /// If there are no tempo events in a MIDI file, 120 bpm is assumed.
     public struct MusicalTempo: Tempo {
         public typealias Timebase = MusicalMIDIFileTimebase
-        
+
         public var microsecondsPerQuarter: UInt32
-        
+
         public init(microsecondsPerQuarter: UInt32) {
             self.microsecondsPerQuarter = microsecondsPerQuarter
         }
@@ -47,11 +47,11 @@ extension MIDIFileEvent.MusicalTempo: MIDIFileEventPayload {
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .tempo(.musical(self))
     }
-    
+
     public var midiFileDescription: String {
         "\(bpm.rounded(decimalPlaces: 3)) bpm"
     }
-    
+
     public var midiFileDebugDescription: String {
         "Tempo(\(bpm) bpm)"
     }
@@ -110,11 +110,11 @@ extension MIDIFileEvent.MusicalTempo {
         let tempoCalc: Double = (60 / fromTempo) * 1_000_000
         return UInt32(tempoCalc)
     }
-    
+
     private static func microsecondsToBPM(ms fromMicroseconds: UInt32) -> Double {
         (60 * 1_000_000) / Double(fromMicroseconds)
     }
-    
+
     static func validate(bpm: Double) -> Double {
         bpm.clamped(to: 3.58 ... 60_000_000.0)
     }

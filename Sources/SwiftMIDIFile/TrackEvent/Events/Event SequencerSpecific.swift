@@ -1,12 +1,12 @@
 //
 //  Event SequencerSpecific.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - SequencerSpecific
 
@@ -24,9 +24,9 @@ extension MIDIFileEvent {
         /// Data bytes.
         /// Typically begins with a 1 or 3 byte manufacturer ID, similar to SysEx.
         public var data: [UInt8] = []
-        
+
         // MARK: - Init
-        
+
         public init(data: [UInt8]) {
             self.data = data
         }
@@ -71,18 +71,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.SequencerSpecific {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x7F] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x7F]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.SequencerSpecific: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .sequencerSpecific }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .sequencerSpecific
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .sequencerSpecific(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -96,7 +100,7 @@ extension MIDIFileEvent.SequencerSpecific: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let data: [UInt8]
         let byteLength: Int
@@ -108,30 +112,30 @@ extension MIDIFileEvent.SequencerSpecific: MIDIFileEventPayload {
                 else {
                     throw .malformed("Event does not start with expected bytes.")
                 }
-                
+
                 let length = try parser.midi1FileVariableLengthValue()
-                
+
                 guard parser.remainingByteCount >= length else {
                     throw .malformed(
                         "Fewer bytes are available (\(parser.remainingByteCount) than are expected (\(length))."
                     )
                 }
-                
+
                 let readData = try parser.toMIDIFileDecodeError(
                     malformedReason: "Not enough bytes in data block.",
-                    try parser.read(bytes: length)
+                    parser.read(bytes: length)
                 )
-                
+
                 let byteLength = parser.readOffset
-                
+
                 return (
                     data: readData.toUInt8Bytes(),
                     byteLength: byteLength
                 )
             }
-            
+
             let newEvent = Self(data: data)
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: byteLength
@@ -140,25 +144,25 @@ extension MIDIFileEvent.SequencerSpecific: MIDIFileEventPayload {
             return .unrecoverableError(error: error)
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 7F length data
-        
+
         D(Self.prefixBytes)
             // length of data
             + D(midi1FileVariableLengthValue: data.count)
             // data
             + D(data)
     }
-    
+
     public var midiFileDescription: String {
         "sequencerSpecific: \(data.count) bytes"
     }
-    
+
     public var midiFileDebugDescription: String {
         let byteDump = data
             .hexString(padEachTo: 2, prefixes: true, separator: ", ")
-        
+
         return "SequencerSpecific(\(data.count) bytes: [\(byteDump)]"
     }
 }

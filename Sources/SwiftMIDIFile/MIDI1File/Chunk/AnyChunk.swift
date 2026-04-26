@@ -1,12 +1,12 @@
 //
 //  AnyChunk.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
 
 extension MIDI1File {
     /// Type-erased box containing a specialized MIDI file chunk.
@@ -44,7 +44,7 @@ extension MIDI1File.AnyChunk: CustomStringConvertible {
         case let .undefined(chunk): chunk.description
         }
     }
-    
+
     /// Generate a description of the chunk, optionally limiting the number of track events in the output for track chunks.
     public func description(maxEventCount: Int?) -> String {
         switch self {
@@ -61,7 +61,7 @@ extension MIDI1File.AnyChunk: CustomDebugStringConvertible {
         case let .undefined(chunk): chunk.debugDescription
         }
     }
-    
+
     /// Generate a debug description of the chunk, optionally limiting the number of track events in the output for track chunks.
     public func debugDescription(maxEventCount: Int?) -> String {
         switch self {
@@ -81,7 +81,7 @@ extension MIDI1File.AnyChunk {
         case let .undefined(chunk): chunk
         }
     }
-    
+
     /// Returns `true` if the chunk is a track.
     public var isTrack: Bool {
         switch self {
@@ -89,7 +89,7 @@ extension MIDI1File.AnyChunk {
         default: false
         }
     }
-    
+
     /// Returns `true` if the chunk is an undefined (non-track) chunk.
     public var isUndefinedChunk: Bool {
         switch self {

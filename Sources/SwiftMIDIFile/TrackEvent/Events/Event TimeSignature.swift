@@ -1,12 +1,12 @@
 //
 //  Event TimeSignature.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - TimeSignature
 
@@ -37,11 +37,11 @@ extension MIDIFileEvent {
         /// The usual value for this parameter is 8, though some sequencers allow the user to
         /// specify that what MIDI thinks of as a quarter note, should be notated as something else.
         public var numberOf32ndNotesInAQuarterNote: UInt8 = 8
-        
+
         // MARK: - Init
-        
+
         public init() { }
-        
+
         /// Time Signature Event.
         ///
         /// - Parameters:
@@ -120,18 +120,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.TimeSignature {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x58, 0x04] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x58, 0x04]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.TimeSignature: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .timeSignature }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .timeSignature
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .timeSignature(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -146,7 +150,7 @@ extension MIDIFileEvent.TimeSignature: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let num, den, clocks, thirtySeconds: UInt8
         do throws(MIDIFileDecodeError) {
@@ -157,13 +161,13 @@ extension MIDIFileEvent.TimeSignature: MIDIFileEventPayload {
                 else {
                     throw .malformed("Time Signature does not start with expected bytes.")
                 }
-                
+
                 do {
                     let numerator = try parser.readByte()
                     let denominator = try parser.readByte()
                     let midiClocksBetweenMetronomeClicks = try parser.readByte()
                     let numberOf32ndNotesInAQuarterNote = try parser.readByte()
-                    
+
                     return (
                         numerator,
                         denominator,
@@ -177,40 +181,40 @@ extension MIDIFileEvent.TimeSignature: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         let newEvent = Self(
             numerator: num,
             denominator: den,
             midiClocksBetweenMetronomeClicks: clocks,
             numberOf32ndNotesInAQuarterNote: thirtySeconds
         )
-        
+
         return .event(
             payload: newEvent,
             byteLength: requiredStreamByteCount
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 58 04 nn dd cc bb
-        
+
         var data = D()
-        
+
         data += Self.prefixBytes
-        
+
         data += [numerator, denominator]
-        
+
         // number of MIDI Clocks in a metronome click
         data += [midiClocksBetweenMetronomeClicks]
-        
+
         // number of notated 32nd-notes in a MIDI quarter-note (24 MIDI Clocks)
         // The usual value for this parameter is 8, though some sequencers allow the user to specify
         // that what MIDI thinks of as a quarter note, should be notated as something else.
         data += [numberOf32ndNotesInAQuarterNote] // 8 32nd-notes
-        
+
         return data
     }
-    
+
     public var midiFileDescription: String {
         let denom = pow(2 as Decimal, Int(denominator))
 

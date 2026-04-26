@@ -1,13 +1,13 @@
 //
 //  Event KeySignature.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
-internal import SwiftDataParsing
 
 // MARK: - KeySignature
 
@@ -29,7 +29,7 @@ extension MIDIFileEvent {
         // No Sharps/Flats
         case cMajor
         case aMinor
-        
+
         // Sharps 1 ... 7, Major
         case gMajor
         case dMajor
@@ -38,7 +38,7 @@ extension MIDIFileEvent {
         case bMajor
         case fSharpMajor
         case cSharpMajor
-        
+
         // Sharps 1 ... 7, Minor
         case eMinor
         case bMinor
@@ -47,7 +47,7 @@ extension MIDIFileEvent {
         case gSharpMinor
         case dSharpMinor
         case aSharpMinor
-        
+
         // Flats 1 ... 7, Major
         case fMajor
         case bFlatMajor
@@ -56,7 +56,7 @@ extension MIDIFileEvent {
         case dFlatMajor
         case gFlatMajor
         case cFlatMajor
-        
+
         // Flats 1 ... 7, Minor
         case dMinor
         case gMinor
@@ -124,7 +124,7 @@ extension MIDI1File.Track.Event {
     ) -> Self {
         Self(delta: delta, event: .keySignature(event))
     }
-    
+
     /// Key Signature event.
     ///
     /// For a format 1 MIDI file, Key Signature Meta events should only occur within the first
@@ -145,18 +145,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.KeySignature {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x59, 0x02] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x59, 0x02]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .keySignature }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .keySignature
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .keySignature(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -171,7 +175,7 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readFlatsOrSharps: Int8
         let readIsMajor: UInt8
@@ -183,26 +187,26 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
                 else {
                     throw .malformed("Key Signature event does not start with expected bytes.")
                 }
-                
+
                 // flats/sharps - two's complement signed Int8
                 let readFlatsOrSharpsByte: UInt8 = try parser.toMIDIFileDecodeError(
                     malformedReason: "Key Signature flats/sharps byte is missing.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
                 let readFlatsOrSharps: Int8 = readFlatsOrSharpsByte.toInt8(as: .twosComplement)
-                
+
                 // major/minor key - 1 or 0
                 let readIsMajor: UInt8 = try parser.toMIDIFileDecodeError(
                     malformedReason: "Key Signature major/minor key byte is missing.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
-                
+
                 return (readFlatsOrSharps: readFlatsOrSharps, readIsMajor: readIsMajor)
             }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard (-7 ... 7).contains(readFlatsOrSharps) else {
@@ -210,7 +214,7 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
                     "Key Signature has invalid sharps/flats byte. Got \(readFlatsOrSharps) but value must be between -7 ... 7."
                 )
             }
-            
+
             guard (0 ... 1).contains(readIsMajor) else {
                 throw .malformed(
                     "Key Signature has invalid major/minor key byte. Got \(readIsMajor) but value must be between 0 ... 1."
@@ -219,9 +223,9 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
         } catch {
             return .recoverableError(payload: nil, byteLength: requiredStreamByteCount, error: error)
         }
-        
+
         let isMajor = readIsMajor == 0
-        
+
         guard let newEvent = Self(flatsOrSharps: readFlatsOrSharps, isMajor: isMajor) else {
             // This should never happen, as the values have already been validated, but throw an error just in case
             let error: MIDIFileDecodeError = .malformed(
@@ -233,19 +237,19 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
                 error: error
             )
         }
-        
+
         return .event(
             payload: newEvent,
             byteLength: requiredStreamByteCount
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 59 02(length) sf mi
         // sf is a byte specifying the number of flats (-ve) or sharps (+ve) that identifies the
         // key signature (-7 = 7 flats, -1 = 1 flat, 0 = key of C, 1 = 1 sharp, etc).
         // mi is a byte specifying a major (0) or minor (1) key.
-        
+
         D(
             Self.prefixBytes
                 // flats/sharps - two's complement signed Int8
@@ -254,11 +258,11 @@ extension MIDIFileEvent.KeySignature: MIDIFileEventPayload {
                 + [isMajor ? 0x00 : 0x01]
         )
     }
-    
+
     public var midiFileDescription: String {
         stringValue
     }
-    
+
     public var midiFileDebugDescription: String {
         "KeySignature(" + midiFileDescription + ")"
     }
@@ -312,8 +316,8 @@ extension MIDIFileEvent.KeySignature {
         }
         set {
             guard let match = Self.allCases
-                .filter( { $0.flatsOrSharps == newValue })
-                .filter( { $0.isMajor == isMajor })
+                .filter({ $0.flatsOrSharps == newValue })
+                .filter({ $0.isMajor == isMajor })
                 .first
             else {
                 return
@@ -321,7 +325,7 @@ extension MIDIFileEvent.KeySignature {
             self = match
         }
     }
-    
+
     /// Returns `true` if the key signature is major key. Returns `false` if it is minor key.
     public var isMajor: Bool {
         get {
@@ -365,8 +369,8 @@ extension MIDIFileEvent.KeySignature {
         }
         set {
             guard let match = Self.allCases
-                .filter( { $0.flatsOrSharps == flatsOrSharps })
-                .filter( { $0.isMajor == newValue })
+                .filter({ $0.flatsOrSharps == flatsOrSharps })
+                .filter({ $0.isMajor == newValue })
                 .first
             else {
                 return
@@ -374,7 +378,7 @@ extension MIDIFileEvent.KeySignature {
             self = match
         }
     }
-    
+
     /// Returns the key signature description suitable for UI display.
     public var stringValue: String {
         // No Sharps/Flats

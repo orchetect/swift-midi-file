@@ -1,12 +1,12 @@
 //
 //  AnyMIDI1File init.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftMIDIInternals
 import Foundation
 import SwiftMIDICore
-internal import SwiftMIDIInternals
 
 // MARK: - Init: Raw Data
 
@@ -25,7 +25,7 @@ extension AnyMIDI1File {
             predicate: predicate
         )
     }
-    
+
     /// Initialize by loading the contents of a MIDI file's raw data, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
@@ -55,7 +55,7 @@ extension AnyMIDI1File {
         let url = try Self.url(forFilePath: path)
         try self.init(url: url, options: options, predicate: predicate)
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
@@ -66,16 +66,16 @@ extension AnyMIDI1File {
         let url = try Self.url(forFilePath: path)
         try await self.init(url: url, options: options, predicate: predicate)
     }
-    
+
     static func url(forFilePath path: String) throws(MIDIFileDecodeError) -> URL {
         guard FileManager.sendableDefault.fileExists(atPath: path) else {
             throw .fileNotFound
         }
-        
+
         guard let url = URL(string: path) else {
             throw .malformedURL
         }
-        
+
         return url
     }
 }
@@ -98,7 +98,7 @@ extension AnyMIDI1File {
             predicate: predicate
         )
     }
-    
+
     /// Initialize by loading the contents of a MIDI file from disk, parsing chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
@@ -128,7 +128,7 @@ extension AnyMIDI1File {
             midi1FileRawBytesStream: data,
             allowMultiTrackFormat0: options.allowMultiTrackFormat0
         )
-        
+
         switch header.header.timebase {
         case .musical(_):
             let midiFile = try MusicalMIDI1File(data: data, options: options, predicate: predicate)
@@ -138,7 +138,7 @@ extension AnyMIDI1File {
             return .smpte(midiFile)
         }
     }
-    
+
     /// Decode chunks concurrently for improved performance.
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     static func decode(
@@ -150,7 +150,7 @@ extension AnyMIDI1File {
             midi1FileRawBytesStream: data,
             allowMultiTrackFormat0: options.allowMultiTrackFormat0
         )
-        
+
         switch header.header.timebase {
         case .musical(_):
             let midiFile = try await MusicalMIDI1File(data: data, options: options, predicate: predicate)

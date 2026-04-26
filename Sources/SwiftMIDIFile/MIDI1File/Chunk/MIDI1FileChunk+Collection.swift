@@ -1,6 +1,6 @@
 //
 //  MIDI1FileChunk+Collection.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -9,7 +9,7 @@ extension Collection where Element: MIDI1FileChunk {
     /// (Omits `id` properties from the comparison.)
     public func isEqual(to other: some Collection<Element>) -> Bool {
         guard count == other.count else { return false }
-        
+
         for (lhs, rhs) in zip(self, other) {
             guard lhs.isEqual(to: rhs) else { return false }
         }

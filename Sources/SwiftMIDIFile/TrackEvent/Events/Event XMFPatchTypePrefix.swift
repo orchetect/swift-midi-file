@@ -1,12 +1,12 @@
 //
 //  Event XMFPatchTypePrefix.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - XMFPatchTypePrefix
 
@@ -42,9 +42,9 @@ extension MIDIFileEvent {
         /// Patch type.
         /// (0: GM1, 1: GM2, 2: DLS instruments, supplied in the XMF file)
         public var patchSet: PatchSet = .generalMIDI1
-        
+
         // MARK: - Init
-        
+
         public init(patchSet: PatchSet) {
             self.patchSet = patchSet
         }
@@ -125,18 +125,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.XMFPatchTypePrefix {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x60] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x60]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.XMFPatchTypePrefix: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .xmfPatchTypePrefix }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .xmfPatchTypePrefix
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .xmfPatchTypePrefix(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -151,7 +155,7 @@ extension MIDIFileEvent.XMFPatchTypePrefix: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readParam: UInt8
         do throws(MIDIFileDecodeError) {
@@ -162,29 +166,29 @@ extension MIDIFileEvent.XMFPatchTypePrefix: MIDIFileEventPayload {
                 else {
                     throw .malformed("Event does not start with expected bytes.")
                 }
-                
+
                 let readLength = try parser.toMIDIFileDecodeError(
                     malformedReason: "Param length byte is missing.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
-                
+
                 guard readLength == 1 else {
                     throw .malformed(
                         "Param length should always be 1."
                     )
                 }
-                
+
                 let readParam = try parser.toMIDIFileDecodeError(
                     malformedReason: "Param value byte is missing.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
-                
+
                 return readParam
             }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard let selectParam = PatchSet(rawValue: readParam) else {
@@ -192,11 +196,11 @@ extension MIDIFileEvent.XMFPatchTypePrefix: MIDIFileEventPayload {
                     "Encountered unexpected param value: \(readParam). Param should be 0, 1 or 2."
                 )
             }
-            
+
             let newEvent = Self(
                 patchSet: selectParam
             )
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: requiredStreamByteCount
@@ -209,20 +213,22 @@ extension MIDIFileEvent.XMFPatchTypePrefix: MIDIFileEventPayload {
             )
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 60 <len> <param>
         // len should always be 1, param is always one byte
-        
+
         D(Self.prefixBytes + [0x01, patchSet.rawValue])
     }
-    
-    static var midi1FileFixedRawBytesLength: Int { 4 }
-    
+
+    static var midi1FileFixedRawBytesLength: Int {
+        4
+    }
+
     public var midiFileDescription: String {
         "patchPrefix:\(patchSet)"
     }
-    
+
     public var midiFileDebugDescription: String {
         "XMFPatchTypePrefix(\(patchSet))"
     }
@@ -242,7 +248,7 @@ extension MIDIFileEvent.XMFPatchTypePrefix {
         /// > See
         /// > [RP-032](https://www.midi.org/specifications/file-format-specifications/standard-midi-files/xmf-patch-type-prefix-meta-event).
         case generalMIDI1 = 0x01
-        
+
         /// General MIDI 2.
         ///
         /// > Standard MIDI File 1.0 Spec, RP-032:
@@ -254,7 +260,7 @@ extension MIDIFileEvent.XMFPatchTypePrefix {
         /// > See
         /// > [RP-032](https://www.midi.org/specifications/file-format-specifications/standard-midi-files/xmf-patch-type-prefix-meta-event).
         case generalMIDI2 = 0x02
-        
+
         /// DLS.
         ///
         /// > Standard MIDI File 1.0 Spec, RP-032:

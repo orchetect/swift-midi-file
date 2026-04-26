@@ -1,12 +1,12 @@
 //
 //  Event ChannelPrefix.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - ChannelPrefix
 
@@ -31,9 +31,9 @@ extension MIDIFileEvent {
     public struct ChannelPrefix {
         /// Channel (`1 ... 16`) is stored zero-based (`0 ... 15`).
         public var channel: UInt4 = 0
-        
+
         // MARK: - Init
-        
+
         public init(channel: UInt4) {
             self.channel = channel
         }
@@ -94,18 +94,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.ChannelPrefix {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x20, 0x01] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x20, 0x01]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.ChannelPrefix: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .channelPrefix }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .channelPrefix
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .channelPrefix(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -120,7 +124,7 @@ extension MIDIFileEvent.ChannelPrefix: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readChannel: UInt8
         do throws(MIDIFileDecodeError) {
@@ -131,18 +135,18 @@ extension MIDIFileEvent.ChannelPrefix: MIDIFileEventPayload {
                 else {
                     throw .malformed("Channel Prefix event does not start with expected bytes.")
                 }
-                
+
                 let readChannel: UInt8 = try parser.toMIDIFileDecodeError(
                     malformedReason: "Channel Prefix is missing channel byte.",
-                    try parser.readByte()
+                    parser.readByte()
                 )
-                
+
                 return readChannel
             }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         let channel: UInt4
         do throws(MIDIFileDecodeError) {
@@ -151,7 +155,7 @@ extension MIDIFileEvent.ChannelPrefix: MIDIFileEventPayload {
             else {
                 throw .malformed("Channel Prefix channel number is out of bounds: \(readChannel)")
             }
-            
+
             channel = channelUInt4
         } catch {
             return .recoverableError(
@@ -160,22 +164,22 @@ extension MIDIFileEvent.ChannelPrefix: MIDIFileEventPayload {
                 error: error
             )
         }
-        
+
         let newEvent = Self(channel: channel)
-        
+
         return .event(
             payload: newEvent,
             byteLength: requiredStreamByteCount
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 20 01 cc
         // cc is channel number (0...15)
-        
+
         D(Self.prefixBytes + [channel.uInt8Value])
     }
-    
+
     public var midiFileDescription: String {
         let chanString = channel.uInt8Value.hexString(padTo: 1, prefix: true)
 

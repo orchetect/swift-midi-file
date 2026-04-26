@@ -1,6 +1,6 @@
 //
 //  MusicalMIDIFileTimebase.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -60,9 +60,9 @@ public struct MusicalMIDIFileTimebase {
     /// The number of ticks per musical quarter-note.
     /// A tick represents the timing resolution - the smallest, most finite unit of time duration possible in a MIDI file track.
     public var ticksPerQuarterNote: UInt16
-    
+
     public init(ticksPerQuarterNote ppq: UInt16) {
-        self.ticksPerQuarterNote = ppq
+        ticksPerQuarterNote = ppq
     }
 }
 
@@ -71,7 +71,9 @@ extension MusicalMIDIFileTimebase: Equatable { }
 extension MusicalMIDIFileTimebase: Hashable { }
 
 extension MusicalMIDIFileTimebase: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MusicalMIDIFileTimebase: Sendable { }
@@ -92,11 +94,11 @@ extension MusicalMIDIFileTimebase: CustomDebugStringConvertible {
 
 extension MIDIFileTimebase where Self == MusicalMIDIFileTimebase {
     public typealias DeltaTime = MusicalMIDIFileDeltaTime
-    
+
     public static func `default`() -> MusicalMIDIFileTimebase {
         MusicalMIDIFileTimebase(ticksPerQuarterNote: 960)
     }
-        
+
     /// Musical MIDI file timebase: Ticks per quarter note (PPQN / PPQ / PPQBase / TPQN).
     ///
     /// Common values: `96`, `120`, `480`, `960` ppq or larger.
@@ -208,34 +210,34 @@ extension AnyMIDIFileTimebase {
 
 extension MusicalMIDIFileTimebase: MIDIFileTimebase {
     // MARK: - Decoding
-    
+
     public init?(midi1FileRawBytes: some DataProtocol) {
         guard midi1FileRawBytes.count == 2 else {
             return nil
         }
-        
+
         let byte1 = midi1FileRawBytes[atOffset: 0]
         let byte2 = midi1FileRawBytes[atOffset: 1]
-        
+
         let ticks = ((UInt16(byte1) & 0b01111111) << 8) + UInt16(byte2)
         self = .init(ticksPerQuarterNote: ticks)
     }
-    
+
     // MARK: - Encoding
-    
+
     public func midi1FileRawBytes() -> Data {
         midi1FileRawBytes(as: Data.self)
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         let data = (ticksPerQuarterNote & 0b01111111_11111111)
             .toData(.bigEndian)
-        
+
         return D(data)
     }
-    
+
     // MARK: - AnyMIDIFileTimebase
-    
+
     public func asAnyMIDIFileTimebase() -> AnyMIDIFileTimebase {
         .musical(self)
     }

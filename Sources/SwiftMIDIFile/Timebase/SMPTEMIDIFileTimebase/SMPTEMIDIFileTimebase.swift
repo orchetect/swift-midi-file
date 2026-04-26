@@ -1,6 +1,6 @@
 //
 //  SMPTEMIDIFileTimebase.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -28,7 +28,7 @@ import SwiftMIDICore
 public struct SMPTEMIDIFileTimebase {
     public var frameRate: MIDI1FileFrameRate
     public var ticksPerFrame: UInt8
-    
+
     public init(frameRate: MIDI1FileFrameRate, ticksPerFrame: UInt8) {
         self.frameRate = frameRate
         self.ticksPerFrame = ticksPerFrame
@@ -40,7 +40,9 @@ extension SMPTEMIDIFileTimebase: Equatable { }
 extension SMPTEMIDIFileTimebase: Hashable { }
 
 extension SMPTEMIDIFileTimebase: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension SMPTEMIDIFileTimebase: Sendable { }
@@ -61,11 +63,11 @@ extension SMPTEMIDIFileTimebase: CustomDebugStringConvertible {
 
 extension MIDIFileTimebase where Self == SMPTEMIDIFileTimebase {
     public typealias DeltaTime = SMPTEMIDIFileDeltaTime
-    
+
     public static func `default`() -> SMPTEMIDIFileTimebase {
         SMPTEMIDIFileTimebase(frameRate: .fps30, ticksPerFrame: 40)
     }
-    
+
     /// SMPTE timecode MIDI file timebase: Ticks per frame at a SMPTE frame rate.
     ///
     /// Typical `ticksPerFrame` values are:
@@ -121,40 +123,40 @@ extension AnyMIDIFileTimebase {
 
 extension SMPTEMIDIFileTimebase: MIDIFileTimebase {
     // MARK: - Decoding
-    
+
     public init?(midi1FileRawBytes: some DataProtocol) {
         guard midi1FileRawBytes.count == 2 else {
             return nil
         }
-        
+
         let byte1 = midi1FileRawBytes[atOffset: 0]
         let byte2 = midi1FileRawBytes[atOffset: 1]
-        
+
         guard let fr = MIDI1FileFrameRate(midi1FileRawHeaderByte: byte1 & 0b01111111) else {
             return nil
         }
         let ticks = byte2
-        
+
         self = .init(frameRate: fr, ticksPerFrame: ticks)
     }
-    
+
     // MARK: - Encoding
-    
+
     public func midi1FileRawBytes() -> Data {
         midi1FileRawBytes(as: Data.self)
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         let data = [
             frameRate.midi1FileRawFileHeaderByte + 0b10000000,
             ticksPerFrame
         ]
-        
+
         return D(data)
     }
-    
+
     // MARK: - AnyMIDIFileTimebase
-    
+
     public func asAnyMIDIFileTimebase() -> AnyMIDIFileTimebase {
         .smpte(self)
     }

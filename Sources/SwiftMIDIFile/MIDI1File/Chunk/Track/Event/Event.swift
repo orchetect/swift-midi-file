@@ -1,6 +1,6 @@
 //
 //  Event.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -10,27 +10,27 @@ extension MIDI1File.Track {
     /// Track event with a delta time offset.
     public struct Event {
         // MARK: - Typealiases
-        
+
         /// Delta time advancement within a MIDI file track.
         public typealias DeltaTime = Timebase.DeltaTime
-        
+
         // MARK: - Identifiable
-        
+
         public let id = UUID()
-        
+
         // MARK: - Properties
-        
+
         /// The delta time offset of the event.
         public var delta: DeltaTime
-        
+
         /// The track event.
         public var event: MIDIFileEvent
-        
+
         public init(delta: DeltaTime, event: MIDIFileEvent) {
             self.delta = delta
             self.event = event
         }
-        
+
         @_disfavoredOverload
         public init(delta: DeltaTime, event: any MIDIFileEventPayload) {
             self.delta = delta

@@ -1,6 +1,6 @@
 //
 //  MIDI1FileChunkDecodeOptions ErrorStrategy.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -10,13 +10,13 @@ extension MIDI1FileChunkDecodeOptions {
         ///
         /// This preserves the file's integrity, as the file only successfully decodes if no errors are encountered.
         case throwOnError
-        
+
         /// Tracks that encounter errors while decoding are silently discarded.
         ///
         /// This helps salvage chunks that are fully intact instead of failing to parse the file entirely.
         /// As a result, this option results in data loss in the event there is data corruption in the source file.
         case discardTracksWithErrors
-        
+
         /// The decoder will attempt to continue decoding after any recoverable errors are encountered.
         ///
         /// In each instance where an error occurs during track decoding, if an event is malformed but a suitable

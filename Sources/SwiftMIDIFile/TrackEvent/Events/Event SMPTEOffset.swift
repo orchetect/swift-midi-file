@@ -1,13 +1,13 @@
 //
 //  Event SMPTEOffset.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
 import SwiftTimecodeCore
-internal import SwiftDataParsing
 
 // MARK: - SMPTEOffset
 
@@ -36,11 +36,11 @@ extension MIDIFileEvent {
                 if oldValue != hours { hours_Validate() }
             }
         }
-        
+
         private mutating func hours_Validate() {
             hours = hours.clamped(to: 0 ... 23)
         }
-        
+
         /// Timecode minutes.
         /// Valid range: `0 ... 59`.
         public var minutes: UInt8 = 0 {
@@ -48,11 +48,11 @@ extension MIDIFileEvent {
                 if oldValue != minutes { minutes_Validate() }
             }
         }
-        
+
         private mutating func minutes_Validate() {
             minutes = minutes.clamped(to: 0 ... 59)
         }
-        
+
         /// Timecode seconds.
         /// Valid range: `0 ... 59`.
         public var seconds: UInt8 = 0 {
@@ -60,11 +60,11 @@ extension MIDIFileEvent {
                 if oldValue != seconds { seconds_Validate() }
             }
         }
-        
+
         private mutating func seconds_Validate() {
             seconds = seconds.clamped(to: 0 ... 59)
         }
-        
+
         /// Timecode frames.
         /// Valid range is dependent on the `frameRate` property
         /// (`0 ... 23` for 24fps, `0 ... 29` for 30fps, etc.).
@@ -73,7 +73,7 @@ extension MIDIFileEvent {
                 if oldValue != frames { frames_Validate() }
             }
         }
-        
+
         private mutating func frames_Validate() {
             switch frameRate {
             case .fps24: frames = frames.clamped(to: 0 ... 23)
@@ -81,7 +81,7 @@ extension MIDIFileEvent {
             case .fps30, .fps29_97d: frames = frames.clamped(to: 0 ... 29)
             }
         }
-        
+
         /// Timecode subframes.
         /// Valid range: `0 ... 99`.
         /// The number of fractional frames, in 100ths of a frame (even in SMPTE-based tracks using
@@ -91,18 +91,18 @@ extension MIDIFileEvent {
                 if oldValue != subframes { subframes_Validate() }
             }
         }
-        
+
         private mutating func subframes_Validate() {
             subframes = subframes.clamped(to: 0 ... 99)
         }
-        
+
         /// The frame rate associated with the SMPTE offset.
         public var frameRate: MIDI1FileFrameRate = .fps30
-        
+
         // MARK: - Init
-        
+
         public init() { }
-        
+
         /// Initialized with raw values.
         ///
         /// - Parameters:
@@ -121,7 +121,7 @@ extension MIDIFileEvent {
             rate: MIDI1FileFrameRate
         ) {
             frameRate = rate
-            
+
             hours = hr; hours_Validate()
             minutes = min; minutes_Validate()
             seconds = sec; seconds_Validate()
@@ -153,13 +153,13 @@ extension MIDIFileEvent.SMPTEOffset {
     public init?(scaling timecode: Timecode) {
         let smpteTCAndRate = timecode.scaledToMIDIFileSMPTEFrameRate
         guard let smpteTC = smpteTCAndRate.scaledTimecode else { return nil }
-        
+
         frameRate = smpteTCAndRate.smpteFR
-        
-        hours =     UInt8(exactly: smpteTC.hours) ?? 0
-        minutes =   UInt8(exactly: smpteTC.minutes) ?? 0
-        seconds =   UInt8(exactly: smpteTC.seconds) ?? 0
-        frames =    UInt8(exactly: smpteTC.frames) ?? 0
+
+        hours = UInt8(exactly: smpteTC.hours) ?? 0
+        minutes = UInt8(exactly: smpteTC.minutes) ?? 0
+        seconds = UInt8(exactly: smpteTC.seconds) ?? 0
+        frames = UInt8(exactly: smpteTC.frames) ?? 0
         subframes = UInt8(exactly: smpteTC.subFrames) ?? 0
     }
 }
@@ -203,7 +203,7 @@ extension MIDIFileEvent {
             )
         )
     }
-    
+
     /// Specify the SMPTE time at which the track is to start.
     /// This optional event, if present, should occur at the start of a track,
     /// at `time == 0`, and prior to any MIDI events.
@@ -260,7 +260,7 @@ extension MIDI1File.Track.Event {
         )
         return Self(delta: delta, event: event)
     }
-    
+
     /// Specify the SMPTE time at which the track is to start.
     /// This optional event, if present, should occur at the start of a track,
     /// at `time == 0`, and prior to any MIDI events.
@@ -293,7 +293,7 @@ extension MIDIFileEvent.SMPTEOffset {
             sf: Int(subframes)
         )
     }
-    
+
     /// Returns a new `Timecode` instance from the SMPTE offset.
     public var timecode: Timecode {
         Timecode(
@@ -309,18 +309,22 @@ extension MIDIFileEvent.SMPTEOffset {
 
 extension MIDIFileEvent.SMPTEOffset {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x54, 0x05] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x54, 0x05]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .smpteOffset }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .smpteOffset
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .smpteOffset(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -335,45 +339,45 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readFrameRateBits, readHours, readMinutes, readSeconds, readFrames, readSubframes: UInt8
         do throws(MIDIFileDecodeError) {
             (readFrameRateBits, readHours, readMinutes, readSeconds, readFrames, readSubframes) =
-            try stream.withDataParser { parser throws(MIDIFileDecodeError) -> (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) in
-                // 3-byte preamble
-                guard let headerBytes = try? parser.read(bytes: Self.prefixBytes.count),
-                      headerBytes.elementsEqual(Self.prefixBytes)
-                else {
-                    throw .malformed("SMPTE Offset does not start with expected bytes.")
+                try stream.withDataParser { parser throws(MIDIFileDecodeError) -> (UInt8, UInt8, UInt8, UInt8, UInt8, UInt8) in
+                    // 3-byte preamble
+                    guard let headerBytes = try? parser.read(bytes: Self.prefixBytes.count),
+                          headerBytes.elementsEqual(Self.prefixBytes)
+                    else {
+                        throw .malformed("SMPTE Offset does not start with expected bytes.")
+                    }
+
+                    do {
+                        let readHoursByte = try parser.readByte()
+                        let readFrameRateBits = (readHoursByte & 0b1100000) >> 5
+                        let readHours = readHoursByte & 0b0011111
+
+                        let readMinutes = try parser.readByte()
+                        let readSeconds = try parser.readByte()
+                        let readFrames = try parser.readByte()
+                        let readSubframes = try parser.readByte()
+
+                        return (
+                            readFrameRateBits: readFrameRateBits,
+                            readHours: readHours,
+                            readMinutes: readMinutes,
+                            readSeconds: readSeconds,
+                            readFrames: readFrames,
+                            readSubframes: readSubframes
+                        )
+                    } catch {
+                        throw .malformed(error.localizedDescription)
+                    }
                 }
-                
-                do {
-                    let readHoursByte = try parser.readByte()
-                    let readFrameRateBits = (readHoursByte & 0b1100000) >> 5
-                    let readHours = readHoursByte & 0b0011111
-                    
-                    let readMinutes = try parser.readByte()
-                    let readSeconds = try parser.readByte()
-                    let readFrames = try parser.readByte()
-                    let readSubframes = try parser.readByte()
-                    
-                    return (
-                        readFrameRateBits: readFrameRateBits,
-                        readHours: readHours,
-                        readMinutes: readMinutes,
-                        readSeconds: readSeconds,
-                        readFrames: readFrames,
-                        readSubframes: readSubframes
-                    )
-                } catch {
-                    throw .malformed(error.localizedDescription)
-                }
-            }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard let readFrameRate = MIDI1FileFrameRate(midi1FileRawTrackOffsetByte: readFrameRateBits)
@@ -383,37 +387,37 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
                     "Could not form SMPTE Offset frame rate from Hours byte."
                 )
             }
-            
+
             guard (0 ... 23).contains(readHours) else {
                 throw .malformed(
                     "SMPTE Offset hours is out of bounds: \(readHours)"
                 )
             }
-            
+
             guard (0 ... 59).contains(readMinutes) else {
                 throw .malformed(
                     "SMPTE Offset minutes is out of bounds: \(readMinutes)"
                 )
             }
-            
+
             guard (0 ... 59).contains(readSeconds) else {
                 throw .malformed(
                     "SMPTE Offset seconds value is out of bounds: \(readSeconds)"
                 )
             }
-            
+
             guard (0 ... 30).contains(readFrames) else {
                 throw .malformed(
                     "SMPTE Offset frames value is out of bounds: \(readFrames)"
                 )
             }
-            
+
             guard (0 ... 99).contains(readSubframes) else {
                 throw .malformed(
                     "SMPTE Offset subframes value is out of bounds: \(readSubframes)"
                 )
             }
-            
+
             let newEvent = Self(
                 hr: readHours,
                 min: readMinutes,
@@ -422,7 +426,7 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
                 subFr: readSubframes,
                 rate: readFrameRate
             )
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: requiredStreamByteCount
@@ -435,7 +439,7 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
             )
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 54 05 hr mn se fr ff
         //
@@ -453,19 +457,19 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
         //
         // ff is a byte specifying the number of fractional frames, in 100ths of a frame (even in
         // SMPTE-based tracks using a different frame subdivision, defined in the MThd chunk).
-        
+
         var data = D()
-        
+
         data += Self.prefixBytes // start bytes
         data += [(frameRate.midi1FileRawTrackOffsetEventByte << 5) + hours] // hour & frame rate
         data += [minutes] // minutes
         data += [seconds] // seconds
         data += [frames] // frames
         data += [subframes] // subframes
-        
+
         return data
     }
-    
+
     public var midiFileDescription: String {
         let time =
             hours.string(paddedTo: 1) + ":" +
@@ -474,10 +478,10 @@ extension MIDIFileEvent.SMPTEOffset: MIDIFileEventPayload {
             frames.string(paddedTo: 2) + "." +
             subframes.string +
             " @ \(frameRate)"
-        
+
         return "smpte: " + time
     }
-    
+
     public var midiFileDebugDescription: String {
         "SMPTEOffset(" + midiFileDescription + ")"
     }
@@ -499,29 +503,29 @@ extension Timecode {
         smpteFR: MIDI1FileFrameRate
     ) {
         let midiFileSMPTEFrameRate = frameRate.midiFileSMPTEFrameRate
-        
+
         var scaledTC = try? converted(to: midiFileSMPTEFrameRate.timecodeRate)
-        
+
         // scale subframes if needed
         if scaledTC?.subFramesBase != .max100SubFrames,
            let nonNilscaledTC = scaledTC
         {
             let originalSF = Double(nonNilscaledTC.subFrames)
             let originalSFD = Double(nonNilscaledTC.subFramesBase.rawValue)
-            
+
             let scaledSubFrames =
                 Int((originalSF / originalSFD) * 100)
-            
+
             var newComponents = nonNilscaledTC.components
             newComponents.subFrames = scaledSubFrames
-            
+
             scaledTC = try? Timecode(
                 .components(newComponents),
                 at: nonNilscaledTC.frameRate,
                 base: .max100SubFrames
             )
         }
-        
+
         // no match
         return (scaledTimecode: scaledTC, smpteFR: midiFileSMPTEFrameRate)
     }

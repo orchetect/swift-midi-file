@@ -1,12 +1,12 @@
 //
 //  Event Tempo.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - Tempo
 
@@ -33,7 +33,7 @@ extension MIDIFileEvent {
         /// MIDI file timebase associated with the tempo.
         /// Tempo events have different interpretations depending on the timebase, so `Tempo` must be specialized.
         associatedtype Timebase: MIDIFileTimebase
-        
+
         /// "Microseconds per quarter-note"; the raw encoding value of the tempo event.
         ///
         /// > Standard MIDI File 1.0 Spec:
@@ -44,7 +44,7 @@ extension MIDIFileEvent {
         /// > Representing tempos as time per beat instead of beat per time allows absolutely exact long-term
         /// > synchronization with a time-based sync protocol such as SMPTE timecode or MIDI timecode.
         var microsecondsPerQuarter: UInt32 { get set }
-        
+
         /// "Microseconds per quarter-note"; the raw encoding value of the tempo event.
         ///
         /// > Standard MIDI File 1.0 Spec:
@@ -62,16 +62,20 @@ extension MIDIFileEvent {
 
 extension MIDIFileEvent.Tempo {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x51, 0x03] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x51, 0x03]
+    }
 }
 
 // MARK: - MIDIFileEventPayload Default Implementation
 
 extension MIDIFileEvent.Tempo /* : MIDIFileEventPayload */ {
-    public static var midiFileEventType: MIDIFileEventType { .tempo }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .tempo
+    }
+
     // `var wrapped` needs to be implemented by the concrete type.
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -86,7 +90,7 @@ extension MIDIFileEvent.Tempo /* : MIDIFileEventPayload */ {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let microseconds: UInt32
         do throws(MIDIFileDecodeError) {
@@ -97,16 +101,16 @@ extension MIDIFileEvent.Tempo /* : MIDIFileEventPayload */ {
                 else {
                     throw .malformed("Tempo does not start with expected bytes.")
                 }
-                
+
                 do {
                     let byte3 = try UInt32(parser.readByte())
                     let byte4 = try UInt32(parser.readByte())
                     let byte5 = try UInt32(parser.readByte())
-                    
+
                     let readUInt32 = (byte3 << 16)
                         + (byte4 << 8)
                         + byte5
-                    
+
                     return readUInt32
                 } catch {
                     throw .malformed("Tempo does not have enough bytes.")
@@ -115,31 +119,31 @@ extension MIDIFileEvent.Tempo /* : MIDIFileEventPayload */ {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         let newEvent = Self(microsecondsPerQuarter: microseconds)
-        
+
         return .event(
             payload: newEvent,
             byteLength: requiredStreamByteCount
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 51 03 xx xx xx
         // xx xx xx = 3-byte (24-bit) microseconds per MIDI quarter-note
-        
+
         var data = D()
-        
+
         data += Self.prefixBytes
-        
+
         var tempoUInt32 = microsecondsPerQuarter
         data += Array(NSData(bytes: &tempoUInt32, length: 3) as Data)
             .reversed()
-        
+
         return data
     }
-    
+
     // `var midiFileDescription` needs to be implemented by the concrete type.
-    
+
     // `var midiFileDebugDescription` needs to be implemented by the concrete type.
 }

@@ -1,12 +1,12 @@
 //
 //  Event UnrecognizedMeta.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - UnrecognizedMeta
 
@@ -43,13 +43,13 @@ extension MIDIFileEvent {
     public struct UnrecognizedMeta {
         // 0x00 is a known meta type, but just default to it here any way
         public var metaType: UInt8 = 0x00
-        
+
         /// Data bytes.
         /// Typically begins with a 1 or 3 byte manufacturer ID, similar to SysEx.
         public var data: [UInt8] = []
-        
+
         // MARK: - Init
-        
+
         public init(
             metaType: UInt8,
             data: [UInt8]
@@ -143,12 +143,14 @@ extension MIDI1File.Track.Event {
 // MARK: - Encoding
 
 extension MIDIFileEvent.UnrecognizedMeta: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .unrecognizedMeta }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .unrecognizedMeta
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .unrecognizedMeta(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -162,52 +164,52 @@ extension MIDIFileEvent.UnrecognizedMeta: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let metaType: UInt8
         let data: [UInt8]
         let byteLength: Int
         do throws(MIDIFileDecodeError) {
-        (metaType, data, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
-            // meta event byte
-            guard (try? parser.readByte()) == 0xFF else {
-                throw .malformed(
-                    "Meta event does not start with expected bytes."
+            (metaType, data, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
+                // meta event byte
+                guard (try? parser.readByte()) == 0xFF else {
+                    throw .malformed(
+                        "Meta event does not start with expected bytes."
+                    )
+                }
+
+                let readMetaType = try parser.toMIDIFileDecodeError(
+                    malformedReason: "Meta type byte is missing.",
+                    parser.readByte()
+                )
+
+                let length = try parser.midi1FileVariableLengthValue()
+
+                let readData = try parser.toMIDIFileDecodeError(
+                    malformedReason: "Meta event does not have enough data bytes.",
+                    parser.read(bytes: length)
+                )
+
+                let byteLength = parser.readOffset
+
+                return (
+                    metaType: readMetaType,
+                    data: readData.toUInt8Bytes(),
+                    byteLength: byteLength
                 )
             }
-        
-            let readMetaType = try parser.toMIDIFileDecodeError(
-                malformedReason: "Meta type byte is missing.",
-                try parser.readByte()
-            )
-            
-            let length = try parser.midi1FileVariableLengthValue()
-            
-            let readData = try parser.toMIDIFileDecodeError(
-                malformedReason: "Meta event does not have enough data bytes.",
-                try parser.read(bytes: length)
-            )
-            
-            let byteLength = parser.readOffset
-            
-            return (
-                metaType: readMetaType,
-                data: readData.toUInt8Bytes(),
-                byteLength: byteLength
-            )
-        }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         let newEvent = Self(metaType: metaType, data: data)
-        
+
         return .event(
             payload: newEvent,
             byteLength: byteLength
         )
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF <type> <length> <bytes>
         // type == UInt8 meta type (unrecognized)
@@ -218,15 +220,15 @@ extension MIDIFileEvent.UnrecognizedMeta: MIDIFileEventPayload {
             // data
             + data
     }
-    
+
     public var midiFileDescription: String {
         "meta: \(metaType), \(data.count) bytes"
     }
-    
+
     public var midiFileDebugDescription: String {
         let byteDump = data
             .hexString(padEachTo: 2, prefixes: true, separator: ", ")
-        
+
         return "UnrecognizedMeta(type: \(metaType), \(data.count) bytes: [\(byteDump)]"
     }
 }

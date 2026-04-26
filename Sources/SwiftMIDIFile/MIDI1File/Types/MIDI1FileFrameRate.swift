@@ -1,6 +1,6 @@
 //
 //  MIDI1FileFrameRate.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -21,7 +21,9 @@ extension MIDI1FileFrameRate: Hashable { }
 extension MIDI1FileFrameRate: CaseIterable { }
 
 extension MIDI1FileFrameRate: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension MIDI1FileFrameRate: Sendable { }
@@ -52,7 +54,7 @@ extension MIDI1FileFrameRate {
         else { return nil }
         self = match
     }
-    
+
     /// Returns the frame rate encoded for a MIDI file SMPTE timebase header.
     ///
     /// MIDI file header time division 2-byte value:
@@ -65,12 +67,14 @@ extension MIDI1FileFrameRate {
     /// - 29.97 drop fps: `0xE3`
     /// - 30 fps: `0xE2`
     public var midi1FileRawFileHeaderByte: UInt8 {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .fps24:     0b1101000 // 0xE8 when adding top bit of 1
         case .fps25:     0b1100111 // 0xE7 when adding top bit of 1
         case .fps29_97d: 0b1100011 // 0xE3 when adding top bit of 1
         case .fps30:     0b1100010 // 0xE2 when adding top bit of 1
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }
 
@@ -83,14 +87,16 @@ extension MIDI1FileFrameRate {
         else { return nil }
         self = match
     }
-    
+
     /// Returns the frame rate encoded for a MIDI file SMPTE offset track event.
     public var midi1FileRawTrackOffsetEventByte: UInt8 {
+        // swiftformat:disable consecutiveSpaces
         switch self {
         case .fps24:     0b00 // 0 decimal
         case .fps25:     0b01 // 1 decimal
         case .fps29_97d: 0b10 // 2 decimal
         case .fps30:     0b11 // 3 decimal
         }
+        // swiftformat:enable consecutiveSpaces
     }
 }

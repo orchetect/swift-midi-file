@@ -1,30 +1,30 @@
 //
 //  UndefinedChunk+Decoding.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 extension MIDI1File.UndefinedChunk {
     /// Init from MIDI file buffer.
-    public init<D: DataProtocol>(midi1FileRawBytesStream stream: D) throws(MIDIFileDecodeError) {
+    public init(midi1FileRawBytesStream stream: some DataProtocol) throws(MIDIFileDecodeError) {
         guard stream.count >= 8 else {
             throw .malformed(
                 "There was a problem reading chunk header. Encountered end of file early."
             )
         }
-        
+
         // track header
-        
+
         let (identifierString, dataBody) = try stream.withDataParser { parser throws(MIDIFileDecodeError) -> (String, Data) in
             let readChunkType = try parser.toMIDIFileDecodeError(
                 malformedReason: "Missing chunk type identifier.",
-                try parser.read(bytes: 4)
+                parser.read(bytes: 4)
             )
-            
+
             guard let chunkLengthInt32 = (try? parser.read(bytes: 4))?
                 .toUInt32(from: .bigEndian)
             else {
@@ -33,34 +33,34 @@ extension MIDI1File.UndefinedChunk {
                 )
             }
             let chunkLength = Int(chunkLengthInt32)
-            
+
             let identifierString = readChunkType.asciiDataToString() ?? "????"
-            
+
             guard let dataBody = try? parser.read(bytes: chunkLength) else {
                 throw .malformed(
                     "There was a problem reading chunk data blob. Encountered end of data early."
                 )
             }
-            
+
             // we can't pass pointer ranges outside of the data reader closure,
             // so we must use them within the closure
             return (identifierString: identifierString, dataBody.toData())
         }
-        
+
         guard !MIDI1FileChunkIdentifier.definedIdentifiers.map(\.string).contains(identifierString)
         else {
             throw .malformed(
                 "Chunk type matches known identifier \(identifierString.quoted). Forming an undefined chunk using this identifier is not allowed."
             )
         }
-        
+
         guard let identifier = MIDI1FileChunkIdentifier(string: identifierString)
         else {
             throw .malformed(
                 "Chunk type matches known identifier \(identifierString.quoted) contains invalid characters. Must be 4 ASCII characters."
             )
         }
-        
+
         self.init(
             identifier: identifier,
             data: dataBody

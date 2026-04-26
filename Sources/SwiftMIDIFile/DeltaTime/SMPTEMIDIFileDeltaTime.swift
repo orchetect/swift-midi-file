@@ -1,6 +1,6 @@
 //
 //  SMPTEMIDIFileDeltaTime.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -10,10 +10,10 @@ import SwiftTimecodeCore
 public enum SMPTEMIDIFileDeltaTime {
     /// Construct delta time duration from frame count.
     case frames(_ frames: Double)
-    
+
     /// Construct delta time duration from SMPTE timecode.
     case offset(_ smpteOffset: MIDIFileEvent.SMPTEOffset)
-    
+
     case ticks(_ ticks: UInt32)
 }
 
@@ -41,18 +41,18 @@ extension SMPTEMIDIFileDeltaTime: CustomStringConvertible {
 
 extension SMPTEMIDIFileDeltaTime: MIDIFileDeltaTime {
     public typealias Timebase = SMPTEMIDIFileTimebase
-    
+
     public func ticks(using timebase: Timebase) -> UInt32 {
         switch self {
         case let .frames(frames):
             let ticks = frames * Double(timebase.ticksPerFrame)
             return UInt32(ticks)
-            
+
         case let .offset(smpteOffset):
             let frames = smpteOffset.timecode.frameCount.doubleValue
             let ticks = frames * Double(timebase.ticksPerFrame)
             return UInt32(ticks)
-            
+
         case let .ticks(ticks):
             return ticks
         }
@@ -82,7 +82,7 @@ extension SMPTEMIDIFileDeltaTime {
         )
         return .offset(smpteOffset)
     }
-    
+
     /// Construct delta time duration from frame count.
     @_disfavoredOverload
     public static func frames(_ frames: some FixedWidthInteger) -> Self {
@@ -99,7 +99,7 @@ extension SMPTEMIDIFileDeltaTime {
         guard tpf > 0 else { return 0.0 } // prevent division by zero
         return Double(ticks(using: timebase)) / Double(tpf)
     }
-    
+
     /// Returns the SMPTE timecode duration of the delta time using the specified timebase.
     public func timecodeInterval(using timebase: Timebase) -> TimecodeInterval {
         let frames = frames(using: timebase)
@@ -109,7 +109,7 @@ extension SMPTEMIDIFileDeltaTime {
             return TimecodeInterval(tc)
         } catch {
             assertionFailure("Failed to form timecode from MIDI file delta time.")
-            let tc = Timecode(.zero, at:  frameRate)
+            let tc = Timecode(.zero, at: frameRate)
             return TimecodeInterval(tc)
         }
     }

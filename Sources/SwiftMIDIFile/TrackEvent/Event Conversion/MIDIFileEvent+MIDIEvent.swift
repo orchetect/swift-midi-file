@@ -1,6 +1,6 @@
 //
 //  MIDIFileEvent+MIDIEvent.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -14,37 +14,37 @@ extension MIDIFileEvent {
         switch self {
         case let .cc(event):
             .cc(event)
-            
+
         case let .noteOff(event):
             .noteOff(event)
-            
+
         case let .noteOn(event):
             .noteOn(event)
-            
+
         case let .notePressure(event):
             .notePressure(event)
-            
+
         case let .pitchBend(event):
             .pitchBend(event)
-            
+
         case let .pressure(event):
             .pressure(event)
-            
+
         case let .programChange(event):
             .programChange(event)
-            
+
         case let .sysEx7(event):
             .sysEx7(event)
-            
+
         case let .universalSysEx7(event):
             .universalSysEx7(event)
-            
+
         case let .rpn(event):
             .rpn(event)
-            
+
         case let .nrpn(event):
             .nrpn(event)
-            
+
         case .channelPrefix,
              .keySignature,
              .portPrefix,

@@ -1,12 +1,12 @@
 //
 //  Event SequenceNumber.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
-internal import SwiftDataParsing
 
 // MARK: - SequenceNumber
 
@@ -32,13 +32,13 @@ extension MIDIFileEvent {
                 if oldValue != sequence { sequence_Validate() }
             }
         }
-        
+
         private mutating func sequence_Validate() {
             sequence = sequence.clamped(to: 0x0 ... 0x7FFF)
         }
-        
+
         // MARK: - Init
-        
+
         public init(sequence: UInt16) {
             self.sequence = sequence
         }
@@ -93,18 +93,22 @@ extension MIDI1File.Track.Event {
 
 extension MIDIFileEvent.SequenceNumber {
     /// The prefix bytes that define the start of the event.
-    public static var prefixBytes: [UInt8] { [0xFF, 0x00, 0x02] }
+    public static var prefixBytes: [UInt8] {
+        [0xFF, 0x00, 0x02]
+    }
 }
 
 // MARK: - Encoding
 
 extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
-    public static var midiFileEventType: MIDIFileEventType { .sequenceNumber }
-    
+    public static var midiFileEventType: MIDIFileEventType {
+        .sequenceNumber
+    }
+
     public func asMIDIFileEvent() -> MIDIFileEvent {
         .sequenceNumber(self)
     }
-    
+
     public static func decode(
         midi1FileRawBytesStream stream: some DataProtocol,
         runningStatus: UInt8?
@@ -119,7 +123,7 @@ extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 2: Parse out required bytes
         let readSequenceNumber: UInt16
         do {
@@ -130,14 +134,14 @@ extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
                 else {
                     throw .malformed("Sequence Number does not start with expected bytes.")
                 }
-                
+
                 guard let readSequenceNumberBytes = try? parser.read(bytes: 2)
                 else {
                     throw .malformed(
                         "Sequence Number does not have enough bytes."
                     )
                 }
-                
+
                 guard let readSequenceNumber = readSequenceNumberBytes
                     .toUInt16(from: .bigEndian)
                 else {
@@ -145,13 +149,13 @@ extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
                         "Sequence Number could not be read."
                     )
                 }
-                
+
                 return readSequenceNumber
             }
         } catch {
             return .unrecoverableError(error: error)
         }
-        
+
         // Step 3: Validate and transform values
         do throws(MIDIFileDecodeError) {
             guard (0x0 ... 0x7FFF).contains(readSequenceNumber) else {
@@ -159,9 +163,9 @@ extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
                     "Sequence Number is out of bounds: \(readSequenceNumber)"
                 )
             }
-            
+
             let newEvent = Self(sequence: readSequenceNumber)
-            
+
             return .event(
                 payload: newEvent,
                 byteLength: requiredStreamByteCount
@@ -174,18 +178,18 @@ extension MIDIFileEvent.SequenceNumber: MIDIFileEventPayload {
             )
         }
     }
-    
+
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 00 02 ssss
         // ssss is UIn16 big-endian sequence number
-        
+
         D(Self.prefixBytes + sequence.toData(.bigEndian))
     }
-    
+
     public var midiFileDescription: String {
         "seqNum:\(sequence)"
     }
-    
+
     public var midiFileDebugDescription: String {
         "SequenceNumber(\(sequence))"
     }

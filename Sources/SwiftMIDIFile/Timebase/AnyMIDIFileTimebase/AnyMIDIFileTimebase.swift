@@ -1,6 +1,6 @@
 //
 //  AnyMIDIFileTimebase.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -11,7 +11,7 @@ import SwiftMIDICore
 public enum AnyMIDIFileTimebase {
     /// Musical timebase.
     case musical(_ timebase: MusicalMIDIFileTimebase)
-    
+
     /// SMPTE timecode timebase.
     case smpte(_ timebase: SMPTEMIDIFileTimebase)
 }
@@ -21,7 +21,9 @@ extension AnyMIDIFileTimebase: Equatable { }
 extension AnyMIDIFileTimebase: Hashable { }
 
 extension AnyMIDIFileTimebase: Identifiable {
-    public var id: Self { self }
+    public var id: Self {
+        self
+    }
 }
 
 extension AnyMIDIFileTimebase: Sendable { }
@@ -54,7 +56,7 @@ extension AnyMIDIFileTimebase {
         case let .smpte(timebase): timebase
         }
     }
-    
+
     /// Returns `true` if the timebase is a musical-based.
     public var isMusical: Bool {
         switch self {
@@ -62,7 +64,7 @@ extension AnyMIDIFileTimebase {
         default: false
         }
     }
-    
+
     /// Returns `true` if the timebase is a SMPTE timecode-based.
     public var isSMPTE: Bool {
         switch self {
@@ -85,35 +87,35 @@ extension AnyMIDIFileTimebase {
 
 extension AnyMIDIFileTimebase: MIDIFileTimebase {
     public typealias DeltaTime = AnyMIDIFileDeltaTime
-    
+
     // MARK: - Decoding
-    
+
     /// Initialize from raw data.
     public init?(midi1FileRawBytes: some DataProtocol) {
         guard midi1FileRawBytes.count == 2 else {
             return nil
         }
-        
+
         let byte1 = midi1FileRawBytes[atOffset: 0]
-        
+
         switch (byte1 & 0b10000000) >> 7 {
         case 0b0: // musical
             guard let timebase = MusicalMIDIFileTimebase(midi1FileRawBytes: midi1FileRawBytes) else { return nil }
             self = .musical(timebase)
             return
-            
+
         case 0b1: // timecode
             guard let timebase = SMPTEMIDIFileTimebase(midi1FileRawBytes: midi1FileRawBytes) else { return nil }
             self = .smpte(timebase)
             return
-            
+
         default:
             return nil
         }
     }
-    
+
     // MARK: - Encoding
-    
+
     public func midi1FileRawBytes() -> Data {
         wrapped.midi1FileRawBytes()
     }
@@ -121,9 +123,9 @@ extension AnyMIDIFileTimebase: MIDIFileTimebase {
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         wrapped.midi1FileRawBytes(as: dataType)
     }
-    
+
     // MARK: - AnyMIDIFileTimebase
-    
+
     public func asAnyMIDIFileTimebase() -> AnyMIDIFileTimebase {
         self
     }

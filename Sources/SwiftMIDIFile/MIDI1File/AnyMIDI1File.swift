@@ -1,6 +1,6 @@
 //
 //  AnyMIDI1File.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -10,7 +10,7 @@ import Foundation
 public enum AnyMIDI1File {
     /// MIDI file with musical timebase.
     case musical(_ midiFile: MusicalMIDI1File)
-    
+
     /// MIDI file with SMPTE timecode timebase.
     case smpte(_ midiFile: SMPTEMIDI1File)
 }
@@ -37,7 +37,7 @@ extension AnyMIDI1File: CustomStringConvertible {
         case let .smpte(midiFile): midiFile.description
         }
     }
-    
+
     /// Generate a description of the track, optionally limiting the number of events from each track in the output.
     public func description(maxEventCount: Int?) -> String {
         switch self {
@@ -54,7 +54,7 @@ extension AnyMIDI1File: CustomDebugStringConvertible {
         case let .smpte(midiFile): midiFile.debugDescription
         }
     }
-    
+
     /// Generate a debug description of the track, optionally limiting the number of events from each track in the output.
     public func debugDescription(maxEventCount: Int?) -> String {
         switch self {
@@ -74,7 +74,7 @@ extension AnyMIDI1File {
         case let .smpte(midiFile): midiFile.header.asAnyMIDI1FileHeader()
         }
     }
-    
+
     /// MIDI file format.
     public var format: MIDI1FileFormat {
         switch self {
@@ -82,7 +82,7 @@ extension AnyMIDI1File {
         case let .smpte(midiFile): midiFile.format
         }
     }
-    
+
     /// MIDI file timebase (for duration calculations).
     public var timebase: AnyMIDIFileTimebase {
         switch self {

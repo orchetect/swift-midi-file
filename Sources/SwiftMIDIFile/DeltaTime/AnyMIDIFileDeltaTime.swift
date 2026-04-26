@@ -1,6 +1,6 @@
 //
 //  AnyMIDIFileDeltaTime.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -50,7 +50,7 @@ extension AnyMIDIFileDeltaTime {
 
 extension AnyMIDIFileDeltaTime: MIDIFileDeltaTime {
     public typealias Timebase = AnyMIDIFileTimebase
-    
+
     public func ticks(using timebase: Timebase) -> UInt32 {
         // TODO: this is a bit wonky but our hands are kind of tied with all the type erasure
         switch (self, timebase) {
@@ -62,7 +62,7 @@ extension AnyMIDIFileDeltaTime: MIDIFileDeltaTime {
             0
         }
     }
-    
+
     public static func ticks(_ ticks: UInt32) -> AnyMIDIFileDeltaTime {
         // just default to musical timebase as it's by far the most common
         // TODO: this is a bit wonky but our hands are kind of tied with all the type erasure

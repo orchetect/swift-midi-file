@@ -1,6 +1,6 @@
 //
 //  Track+Musical.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -20,7 +20,7 @@ extension MIDI1File.Track where Timebase == MusicalMIDIFileTimebase {
             return (beat: position, event: $0.event)
         }
     }
-    
+
     /// Returns the first **tempo** event found at time zero.
     /// If no such event exists, `nil` is returned.
     ///

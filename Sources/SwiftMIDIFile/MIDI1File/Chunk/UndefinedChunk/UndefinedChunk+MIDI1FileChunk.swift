@@ -1,15 +1,15 @@
 //
 //  UndefinedChunk+MIDI1FileChunk.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
-import Foundation
 internal import SwiftMIDIInternals
+import Foundation
 
 extension MIDI1File.UndefinedChunk: MIDI1FileChunk {
     // `identifier` is a stored instance property
-    
+
     public func isEqual(to other: Self) -> Bool {
         identifier == other.identifier
             && rawData == other.rawData
@@ -26,7 +26,7 @@ extension MIDI1File.AnyChunk {
     ) -> Self {
         .undefined(.init(identifier: identifier, data: data))
     }
-    
+
     /// Undefined MIDI file chunk.
     @_disfavoredOverload
     public static func undefined(

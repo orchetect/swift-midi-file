@@ -1,6 +1,6 @@
 //
 //  MIDI1FileDecodeOptions.swift
-//  swift-midi • https://github.com/orchetect/swift-midi
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
@@ -9,7 +9,7 @@ public struct MIDI1FileDecodeOptions {
     /// Allows malformed MIDI files that declare they are format 0 (single track) but contain zero or multiple tracks.
     /// If `false`, this is an error condition and the file is considered malformed.
     public var allowMultiTrackFormat0: Bool
-    
+
     /// Ignore any bytes that may be present past the "end of file".
     /// If `false`, if any extraneous bytes are present it is considered a malformed file and an error is thrown.
     ///
@@ -23,10 +23,10 @@ public struct MIDI1FileDecodeOptions {
     ///
     /// See issue for more details: https://github.com/orchetect/MIDIKit/issues/177
     public var ignoreBytesPastEOF: Bool
-    
+
     /// MIDI file track decoding options.
     public var chunkDecodeOptions: MIDI1FileChunkDecodeOptions
-    
+
     public init(
         allowMultiTrackFormat0: Bool = true,
         ignoreBytesPastEOF: Bool = true,
