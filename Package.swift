@@ -20,7 +20,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/orchetect/swift-midi-core", from: "0.0.0"),
         .package(url: "https://github.com/orchetect/swift-data-parsing", from: "0.1.2"),
-        .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.0")
+        .package(url: "https://github.com/orchetect/swift-timecode", from: "3.1.0"),
+        .package(url: "https://github.com/orchetect/swift-testing-extensions", from: "0.3.0")
     ],
     targets: [
         .target(
@@ -36,7 +37,8 @@ let package = Package(
         .testTarget(
             name: "SwiftMIDIFileTests",
             dependencies: [
-                "SwiftMIDIFile"
+                "SwiftMIDIFile",
+                .product(name: "TestingExtensions", package: "swift-testing-extensions")
             ]
         )
     ]
