@@ -70,7 +70,7 @@ import Testing
     }
     
     @Test
-    func Init_midi1FileRawBytes_127Bytes() throws {
+    func init_midi1FileRawBytes_127Bytes() throws {
         let data: [UInt8] = .init(repeating: 0x12, count: 127)
         
         let bytes: [UInt8] =
@@ -104,7 +104,7 @@ import Testing
     }
     
     @Test
-    func Init_midi1FileRawBytes_128Bytes() throws {
+    func init_midi1FileRawBytes_128Bytes() throws {
         let data: [UInt8] = .init(repeating: 0x12, count: 128)
         
         let bytes: [UInt8] =
@@ -119,7 +119,7 @@ import Testing
     }
     
     @Test
-    func MIDI1SMFRawBytes_128Bytes() {
+    func midi1SMFRawBytes_128Bytes() {
         let data: [UInt8] = .init(repeating: 0x12, count: 128)
         
         let event = MIDIFileEvent.UnrecognizedMeta(
