@@ -15,8 +15,8 @@ extension MIDI1File {
     /// - Tip: Consider using the `async` overload of this initializer, as it is much more performant.
     public init(
         data: some DataProtocol & Sendable,
-        options: MIDI1FileDecodeOptions,
-        predicate: DecodePredicate?
+        options: MIDI1FileDecodeOptions = MIDI1FileDecodeOptions(),
+        predicate: DecodePredicate? = nil
     ) throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
         
@@ -33,8 +33,8 @@ extension MIDI1File {
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
         data: some DataProtocol & Sendable,
-        options: MIDI1FileDecodeOptions,
-        predicate: DecodePredicate?
+        options: MIDI1FileDecodeOptions = MIDI1FileDecodeOptions(),
+        predicate: DecodePredicate? = nil
     ) async throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
         
@@ -65,8 +65,8 @@ extension MIDI1File {
     @available(macOS 10.15, iOS 13, tvOS 13, watchOS 6, *)
     public init(
         data: some DataProtocol & Sendable,
-        options: MIDI1FileDecodeOptions,
-        predicate: DecodePredicate?,
+        options: MIDI1FileDecodeOptions = MIDI1FileDecodeOptions(),
+        predicate: DecodePredicate? = nil,
         parsedChunk: @escaping ChunkDecodeBlock
     ) async throws(MIDIFileDecodeError) {
         let parser = try Parser(data: data, options: options)
