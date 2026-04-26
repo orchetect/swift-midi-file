@@ -1,7 +1,7 @@
 //
 //  UndefinedChunk Tests.swift
-//  MIDIKit • https://github.com/orchetect/MIDIKit
-//  © 2021-2025 Steffan Andrews • Licensed under MIT License
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
+//  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
 import Foundation

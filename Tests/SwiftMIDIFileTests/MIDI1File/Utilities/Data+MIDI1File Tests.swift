@@ -4,12 +4,13 @@
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
+import Foundation
 @testable import SwiftMIDIFile
 import Testing
 
-@Suite struct Data_And_MIDI1File_Tests {
+@Suite struct Data_MIDI1File_Tests {
     @Test
-    func encodeVariableLengthValue() {
+    func byteArray_init_midi1FileVariableLengthValue() async {
         #expect([UInt8](midi1FileVariableLengthValue: 0) == [0x00])
         #expect([UInt8](midi1FileVariableLengthValue: 1) == [0x01])
         #expect([UInt8](midi1FileVariableLengthValue: 64) == [0x40])
@@ -28,12 +29,12 @@ import Testing
     }
     
     @Test
-    func decodeVariableLengthValue_Empty() {
-        #expect([UInt8]().midi1FileVariableLengthValue() == nil)
+    func byteArray_midi1FileVariableLengthValue_Empty() async {
+        #expect(([] as [UInt8]).midi1FileVariableLengthValue() == nil)
     }
     
     @Test
-    func decodeVariableLengthValue() {
+    func byteArray_midi1FileVariableLengthValue() async {
         // repeat the test for:
         //   1. empty trailing bytes (so input bytes comprise only the variable length value)
         //   2. one or more trailing bytes existing in the input buffer
@@ -94,9 +95,83 @@ import Testing
     }
     
     @Test
-    func decodeVariableLengthValue_EdgeCase() {
+    func data_midi1FileVariableLengthValue_data_pointer() async throws {
+        // 1 byte: max 7-bit value
+        
+        try Data([0x7F, 0x00]).withContiguousStorageIfAvailable({
+            let result = try #require($0.midi1FileVariableLengthValue())
+            #expect(result.value == 127)
+            #expect(result.byteLength == 1)
+        })!
+        
+        // 2 bytes: max 14-bit value
+        
+        try Data([0x81, 0x00]).withContiguousStorageIfAvailable({
+            let result = try #require($0.midi1FileVariableLengthValue())
+            #expect(result.value == 128)
+            #expect(result.byteLength == 2)
+        })!
+        
+        // 3 bytes: max 21-bit value
+        
+        try Data([0x81, 0x80, 0x00]).withContiguousStorageIfAvailable({
+            let result = try #require($0.midi1FileVariableLengthValue())
+            #expect(result.value == 16384)
+            #expect(result.byteLength == 3)
+        })!
+        
+        // 4 bytes: max 28-bit value
+        
+        try Data([0xFF, 0xFF, 0xFF, 0x7F]).withContiguousStorageIfAvailable({
+            let result = try #require($0.midi1FileVariableLengthValue())
+            #expect(result.value == 268_435_455)
+            #expect(result.byteLength == 4)
+        })!
+    }
+    
+    @Test
+    func data_midi1FileVariableLengthValue_uInt8Array_pointer_slice() async throws {
+        // 1 byte: max 7-bit value
+        
+        try Data([0x01, 0x7F, 0x00]).withContiguousStorageIfAvailable({
+            let slice = $0[1...]
+            let result = try #require(slice.midi1FileVariableLengthValue())
+            #expect(result.value == 127)
+            #expect(result.byteLength == 1)
+        })!
+        
+        // 2 bytes: max 14-bit value
+        
+        try Data([0x01, 0x81, 0x00]).withContiguousStorageIfAvailable({
+            let slice = $0[1...]
+            let result = try #require(slice.midi1FileVariableLengthValue())
+            #expect(result.value == 128)
+            #expect(result.byteLength == 2)
+        })!
+        
+        // 3 bytes: max 21-bit value
+        
+        try Data([0x01, 0x81, 0x80, 0x00]).withContiguousStorageIfAvailable({
+            let slice = $0[1...]
+            let result = try #require(slice.midi1FileVariableLengthValue())
+            #expect(result.value == 16384)
+            #expect(result.byteLength == 3)
+        })!
+        
+        // 4 bytes: max 28-bit value
+        
+        try Data([0x01, 0xFF, 0xFF, 0xFF, 0x7F]).withContiguousStorageIfAvailable({
+            let slice = $0[1...]
+            let result = try #require(slice.midi1FileVariableLengthValue())
+            #expect(result.value == 268_435_455)
+            #expect(result.byteLength == 4)
+        })!
+    }
+    
+    @Test
+    func byteArray_midi1FileVariableLengthValue_EdgeCase() async {
         // ensure setting the top bit with no bytes following does not crash
         
-        #expect(([0x80] as [UInt8]).midi1FileVariableLengthValue() == nil)
+        #expect([0x80].midi1FileVariableLengthValue() == nil)
     }
 }
