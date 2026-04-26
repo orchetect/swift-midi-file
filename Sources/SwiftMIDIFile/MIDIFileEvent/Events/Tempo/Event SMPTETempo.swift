@@ -29,6 +29,12 @@ extension MIDIFileEvent {
     }
 }
 
+// MARK: - Init
+
+extension MIDIFileEvent.SMPTETempo {
+    // TODO: add inits
+}
+
 // MARK: - MIDIFileEventPayload Overrides
 
 extension MIDIFileEvent.SMPTETempo: MIDIFileEventPayload {
@@ -45,4 +51,18 @@ extension MIDIFileEvent.SMPTETempo: MIDIFileEventPayload {
     public var midiFileDebugDescription: String {
         "SMPTETempo(\(midiFileDescription))"
     }
+}
+
+// MARK: - Static Constructors
+
+extension MIDIFileEvent.AnyTempo {
+    // TODO: add static constructors to match initializers
+}
+
+extension MIDIFileEvent {
+    // TODO: add static constructors to match initializers
+}
+
+extension MIDI1File.Track.Event where Timebase == SMPTEMIDIFileTimebase {
+    // TODO: add static constructors to match initializers
 }

@@ -59,6 +59,19 @@ extension MIDIFileEvent.MusicalTempo: MIDIFileEventPayload {
 
 // MARK: - Static Constructors
 
+extension MIDIFileEvent.AnyTempo {
+    /// Tempo event for MIDI file tracks using musical timebase.
+    /// For a format 1 MIDI file, tempo events should only occur within the first `MTrk` chunk.
+    /// Minimum possible is 3.58 bpm and maximum is 60,000,000 bpm.
+    public static func musical(
+        bpm: Double
+    ) -> Self {
+        .musical(
+            .init(bpm: bpm)
+        )
+    }
+}
+
 extension MIDIFileEvent {
     /// Tempo event for MIDI file tracks using musical timebase.
     /// For a format 1 MIDI file, tempo events should only occur within the first `MTrk` chunk.
