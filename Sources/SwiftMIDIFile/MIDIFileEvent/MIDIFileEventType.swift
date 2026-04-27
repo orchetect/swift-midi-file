@@ -69,7 +69,7 @@ extension MIDIFileEventType {
         case .text:               MIDIFileEvent.Text.self
         case .timeSignature:      MIDIFileEvent.TimeSignature.self
         case .universalSysEx7:    MIDIFileEvent.UniversalSysEx7.self
-        case .undefinedMeta   :   MIDIFileEvent.UndefinedMeta.self
+        case .undefinedMeta:      MIDIFileEvent.UndefinedMeta.self
         case .xmfPatchTypePrefix: MIDIFileEvent.XMFPatchTypePrefix.self
         }
         // swiftformat:enable consecutiveSpaces
