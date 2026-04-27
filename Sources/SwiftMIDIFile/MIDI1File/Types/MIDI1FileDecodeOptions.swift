@@ -21,7 +21,7 @@ public struct MIDI1FileDecodeOptions {
     /// or if they were opened in a text editor and resaved by an individual. This parsing option is a
     /// mitigation to work around these type of scenarios.
     ///
-    /// See issue for more details: https://github.com/orchetect/MIDIKit/issues/177
+    /// See issue for more details: https://github.com/orchetect/swift-midi/issues/177
     public var ignoreBytesPastEOF: Bool
 
     /// MIDI file track decoding options.

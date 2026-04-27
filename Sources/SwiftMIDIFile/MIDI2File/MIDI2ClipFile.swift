@@ -5,6 +5,6 @@
 //
 
 // TODO: Implement MIDI Clip File (SMF 2.0)
-// See: https://github.com/orchetect/MIDIKit/issues/274
+// See: https://github.com/orchetect/swift-midi/issues/274
 
 // public struct MIDI2ClipFile { }

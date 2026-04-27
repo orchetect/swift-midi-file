@@ -260,7 +260,7 @@ struct Musical_Track_Tests {
     /// Regression test: Test authoring and parsing a Standard MIDI File with very large events.
     @Test(
         .bug(
-            "https://github.com/orchetect/MIDIKit/issues/268",
+            "https://github.com/orchetect/swift-midi/issues/268",
             "Read-ahead buffer truncates large meta/sequencer-specific events"
         )
     )
