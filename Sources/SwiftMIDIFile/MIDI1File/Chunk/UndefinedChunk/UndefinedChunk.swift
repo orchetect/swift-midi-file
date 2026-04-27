@@ -8,7 +8,7 @@ import Foundation
 import SwiftMIDICore
 
 extension MIDI1File {
-    /// Unrecognized MIDI File Chunk.
+    /// Undefined MIDI File Chunk.
     public struct UndefinedChunk {
         // MARK: - Identifiable
 

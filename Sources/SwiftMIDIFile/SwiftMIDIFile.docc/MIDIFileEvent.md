@@ -53,7 +53,7 @@ For more information on `MIDIEvent`, refer to its documentation in the SwiftMIDI
 
 ### Orphan Events
 
-- <doc:MIDIFileEvent-UnrecognizedMeta>
+- <doc:MIDIFileEvent-UndefinedMeta>
 
 ### Unwrapping Payload
 

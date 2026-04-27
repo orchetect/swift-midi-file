@@ -431,8 +431,8 @@ struct MIDIFileEvent_to_MIDIEvent_Tests {
     }
 
     @Test
-    func midi_File_Event_UnrecognizedMeta_midiEvent() {
-        let midiFileEvent = MIDIFileEvent.unrecognizedMeta(
+    func midi_File_Event_UndefinedMeta_midiEvent() {
+        let midiFileEvent = MIDIFileEvent.undefinedMeta(
             metaType: 0x30,
             data: [0x12, 0x34]
         )

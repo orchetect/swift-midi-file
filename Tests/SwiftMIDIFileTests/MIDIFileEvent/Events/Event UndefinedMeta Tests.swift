@@ -1,5 +1,5 @@
 //
-//  Event UnrecognizedMeta Tests.swift
+//  Event UndefinedMeta Tests.swift
 //  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
@@ -8,7 +8,7 @@
 import Testing
 
 @Suite
-struct Event_UnrecognizedMeta_Tests {
+struct Event_UndefinedMeta_Tests {
     // swiftformat:disable consecutiveSpaces
     // swiftformat:options --wrap-collections preserve --allow-partial-wrapping true
 
@@ -19,7 +19,7 @@ struct Event_UnrecognizedMeta_Tests {
             0x00        // length: 0 bytes to follow
         ]
 
-        let event = try MIDIFileEvent.UnrecognizedMeta(midi1FileRawBytes: bytes)
+        let event = try MIDIFileEvent.UndefinedMeta(midi1FileRawBytes: bytes)
 
         #expect(event.metaType == 0x30)
         #expect(event.data == [])
@@ -27,7 +27,7 @@ struct Event_UnrecognizedMeta_Tests {
 
     @Test
     func midi1FileRawBytes_EmptyData() {
-        let event = MIDIFileEvent.UnrecognizedMeta(
+        let event = MIDIFileEvent.UndefinedMeta(
             metaType: 0x30,
             data: []
         )
@@ -48,7 +48,7 @@ struct Event_UnrecognizedMeta_Tests {
             0x12        // data byte
         ]
 
-        let event = try MIDIFileEvent.UnrecognizedMeta(midi1FileRawBytes: bytes)
+        let event = try MIDIFileEvent.UndefinedMeta(midi1FileRawBytes: bytes)
 
         #expect(event.metaType == 0x30)
         #expect(event.data == [0x12])
@@ -56,7 +56,7 @@ struct Event_UnrecognizedMeta_Tests {
 
     @Test
     func midi1FileRawBytes_WithData() {
-        let event = MIDIFileEvent.UnrecognizedMeta(
+        let event = MIDIFileEvent.UndefinedMeta(
             metaType: 0x30,
             data: [0x12]
         )
@@ -79,7 +79,7 @@ struct Event_UnrecognizedMeta_Tests {
              0x7F]       // length: 127 bytes to follow
             + data       // data
 
-        let event = try MIDIFileEvent.UnrecognizedMeta(midi1FileRawBytes: bytes)
+        let event = try MIDIFileEvent.UndefinedMeta(midi1FileRawBytes: bytes)
 
         #expect(event.metaType == 0x30)
         #expect(event.data == data)
@@ -89,7 +89,7 @@ struct Event_UnrecognizedMeta_Tests {
     func midi1FileRawBytes_127Bytes() {
         let data: [UInt8] = .init(repeating: 0x12, count: 127)
 
-        let event = MIDIFileEvent.UnrecognizedMeta(
+        let event = MIDIFileEvent.UndefinedMeta(
             metaType: 0x30,
             data: data
         )
@@ -113,7 +113,7 @@ struct Event_UnrecognizedMeta_Tests {
              0x81, 0x00] // length: 128 bytes to follow
             + data       // data
 
-        let event = try MIDIFileEvent.UnrecognizedMeta(midi1FileRawBytes: bytes)
+        let event = try MIDIFileEvent.UndefinedMeta(midi1FileRawBytes: bytes)
 
         #expect(event.metaType == 0x30)
         #expect(event.data == data)
@@ -123,7 +123,7 @@ struct Event_UnrecognizedMeta_Tests {
     func midi1SMFRawBytes_128Bytes() {
         let data: [UInt8] = .init(repeating: 0x12, count: 128)
 
-        let event = MIDIFileEvent.UnrecognizedMeta(
+        let event = MIDIFileEvent.UndefinedMeta(
             metaType: 0x30,
             data: data
         )

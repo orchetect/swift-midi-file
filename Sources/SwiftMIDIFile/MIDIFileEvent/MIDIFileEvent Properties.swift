@@ -32,7 +32,7 @@ extension MIDIFileEvent {
         case .text: .text
         case .timeSignature: .timeSignature
         case .universalSysEx7: .universalSysEx7
-        case .unrecognizedMeta: .unrecognizedMeta
+        case .undefinedMeta: .undefinedMeta
         case .xmfPatchTypePrefix: .xmfPatchTypePrefix
         }
     }
@@ -60,7 +60,7 @@ extension MIDIFileEvent {
         case let .text(payload): payload
         case let .timeSignature(payload): payload
         case let .universalSysEx7(payload): payload
-        case let .unrecognizedMeta(payload): payload
+        case let .undefinedMeta(payload): payload
         case let .xmfPatchTypePrefix(payload): payload
         }
     }

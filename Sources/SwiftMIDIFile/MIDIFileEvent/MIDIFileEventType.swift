@@ -29,7 +29,7 @@ public enum MIDIFileEventType: String {
     case text
     case timeSignature
     case universalSysEx7
-    case unrecognizedMeta
+    case undefinedMeta
     case xmfPatchTypePrefix
 }
 
@@ -69,7 +69,7 @@ extension MIDIFileEventType {
         case .text:               MIDIFileEvent.Text.self
         case .timeSignature:      MIDIFileEvent.TimeSignature.self
         case .universalSysEx7:    MIDIFileEvent.UniversalSysEx7.self
-        case .unrecognizedMeta:   MIDIFileEvent.UnrecognizedMeta.self
+        case .undefinedMeta   :   MIDIFileEvent.UndefinedMeta.self
         case .xmfPatchTypePrefix: MIDIFileEvent.XMFPatchTypePrefix.self
         }
         // swiftformat:enable consecutiveSpaces
@@ -187,7 +187,7 @@ extension MIDIFileEventType {
 
         // this check should be last
         if data.starts(with: [0xFF]) {
-            return .unrecognizedMeta
+            return .undefinedMeta
         }
 
         return nil
@@ -219,7 +219,7 @@ extension MIDIFileEventType {
         case .text:               (minimum: 3, isFixed: false)
         case .timeSignature:      (minimum: 7, isFixed: true)
         case .universalSysEx7:    (minimum: 3, isFixed: false)
-        case .unrecognizedMeta:   (minimum: 3, isFixed: false)
+        case .undefinedMeta:      (minimum: 3, isFixed: false)
         case .xmfPatchTypePrefix: (minimum: 4, isFixed: true)
         }
         // swiftformat:enable consecutiveSpaces
@@ -250,7 +250,7 @@ extension MIDIFileEventType {
         case .text:               false
         case .timeSignature:      false
         case .universalSysEx7:    false
-        case .unrecognizedMeta:   false
+        case .undefinedMeta:      false
         case .xmfPatchTypePrefix: false
         }
         // swiftformat:enable consecutiveSpaces

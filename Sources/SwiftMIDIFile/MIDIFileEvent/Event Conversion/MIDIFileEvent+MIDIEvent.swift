@@ -54,7 +54,7 @@ extension MIDIFileEvent {
              .tempo,
              .text,
              .timeSignature,
-             .unrecognizedMeta,
+             .undefinedMeta,
              .xmfPatchTypePrefix:
             // Not applicable to MIDI I/O, only applicable to MIDI files.
             nil

@@ -1,5 +1,5 @@
 //
-//  Event UnrecognizedMeta.swift
+//  Event UndefinedMeta.swift
 //  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
@@ -8,7 +8,7 @@ internal import SwiftDataParsing
 import Foundation
 import SwiftMIDICore
 
-// MARK: - UnrecognizedMeta
+// MARK: - UndefinedMeta
 
 // ------------------------------------
 // NOTE: When revising these documentation blocks, they are duplicated in:
@@ -18,11 +18,11 @@ import SwiftMIDICore
 // ------------------------------------
 
 extension MIDIFileEvent {
-    /// Unrecognized Meta Event
+    /// Undefined Meta Event
     ///
-    /// > Note: This is not designed to be instanced, but is instead a placeholder for unrecognized
-    /// > or malformed data while parsing the contents of a MIDI file. In then allows for manual
-    /// > parsing or introspection of the unrecognized data.
+    /// > Note: When parsing MIDI files, this is a placeholder for unrecognized or potentially malformed
+    /// > data. It is not defined by the Standard MIDI spec, and is therefore not meant to be used
+    /// > when authoring or writing MIDI files.
     ///
     /// > Standard MIDI File 1.0 Spec:
     /// >
@@ -40,7 +40,7 @@ extension MIDIFileEvent {
     /// >
     /// > SysEx events and meta-events cancel any running status which was in effect. Running status
     /// > does not apply to and may not be used for these messages.
-    public struct UnrecognizedMeta {
+    public struct UndefinedMeta {
         // 0x00 is a known meta type, but just default to it here any way
         public var metaType: UInt8 = 0x00
 
@@ -60,20 +60,20 @@ extension MIDIFileEvent {
     }
 }
 
-extension MIDIFileEvent.UnrecognizedMeta: Equatable { }
+extension MIDIFileEvent.UndefinedMeta: Equatable { }
 
-extension MIDIFileEvent.UnrecognizedMeta: Hashable { }
+extension MIDIFileEvent.UndefinedMeta: Hashable { }
 
-extension MIDIFileEvent.UnrecognizedMeta: Sendable { }
+extension MIDIFileEvent.UndefinedMeta: Sendable { }
 
 // MARK: - Static Constructors
 
 extension MIDIFileEvent {
-    /// Unrecognized Meta Event
+    /// Undefined Meta Event
     ///
-    /// > Note: This is not designed to be instanced, but is instead a placeholder for unrecognized
-    /// or malformed data while parsing the contents of a MIDI file. In then allows for manual
-    /// parsing or introspection of the unrecognized data.
+    /// > Note: When parsing MIDI files, this is a placeholder for unrecognized or potentially malformed
+    /// > data. It is not defined by the Standard MIDI spec, and is therefore not meant to be used
+    /// > when authoring or writing MIDI files.
     ///
     /// > Standard MIDI File 1.0 Spec:
     /// >
@@ -91,11 +91,11 @@ extension MIDIFileEvent {
     /// >
     /// > SysEx events and meta-events cancel any running status which was in effect. Running status
     /// > does not apply to and may not be used for these messages.
-    public static func unrecognizedMeta(
+    public static func undefinedMeta(
         metaType: UInt8,
         data: [UInt8]
     ) -> Self {
-        .unrecognizedMeta(
+        .undefinedMeta(
             .init(
                 metaType: metaType,
                 data: data
@@ -105,11 +105,11 @@ extension MIDIFileEvent {
 }
 
 extension MIDI1File.Track.Event {
-    /// Unrecognized Meta Event
+    /// Undefined Meta Event
     ///
-    /// > Note: This is not designed to be instanced, but is instead a placeholder for unrecognized
-    /// or malformed data while parsing the contents of a MIDI file. In then allows for manual
-    /// parsing or introspection of the unrecognized data.
+    /// > Note: When parsing MIDI files, this is a placeholder for unrecognized or potentially malformed
+    /// > data. It is not defined by the Standard MIDI spec, and is therefore not meant to be used
+    /// > when authoring or writing MIDI files.
     ///
     /// > Standard MIDI File 1.0 Spec:
     /// >
@@ -127,12 +127,12 @@ extension MIDI1File.Track.Event {
     /// >
     /// > SysEx events and meta-events cancel any running status which was in effect. Running status
     /// > does not apply to and may not be used for these messages.
-    public static func unrecognizedMeta(
+    public static func undefinedMeta(
         delta: DeltaTime = .none,
         metaType: UInt8,
         data: [UInt8]
     ) -> Self {
-        let event: MIDIFileEvent = .unrecognizedMeta(
+        let event: MIDIFileEvent = .undefinedMeta(
             metaType: metaType,
             data: data
         )
@@ -142,13 +142,13 @@ extension MIDI1File.Track.Event {
 
 // MARK: - Encoding
 
-extension MIDIFileEvent.UnrecognizedMeta: MIDIFileEventPayload {
+extension MIDIFileEvent.UndefinedMeta: MIDIFileEventPayload {
     public static var midiFileEventType: MIDIFileEventType {
-        .unrecognizedMeta
+        .undefinedMeta
     }
 
     public func asMIDIFileEvent() -> MIDIFileEvent {
-        .unrecognizedMeta(self)
+        .undefinedMeta(self)
     }
 
     public static func decode(
@@ -229,6 +229,6 @@ extension MIDIFileEvent.UnrecognizedMeta: MIDIFileEventPayload {
         let byteDump = data
             .hexString(padEachTo: 2, prefixes: true, separator: ", ")
 
-        return "UnrecognizedMeta(type: \(metaType), \(data.count) bytes: [\(byteDump)]"
+        return "UndefinedMeta(type: \(metaType), \(data.count) bytes: [\(byteDump)]"
     }
 }

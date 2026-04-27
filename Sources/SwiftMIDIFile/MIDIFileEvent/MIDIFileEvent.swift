@@ -138,11 +138,11 @@ public enum MIDIFileEvent {
     /// If there are no Time Signature events in a MIDI file, 4/4 is assumed.
     case timeSignature(TimeSignature)
 
-    /// Unrecognized Meta Event.
+    /// Undefined Meta Event.
     ///
-    /// > Note: This is not designed to be instanced, but is instead a placeholder for unrecognized
-    /// > or malformed data while parsing the contents of a MIDI file. In then allows for manual
-    /// > parsing or introspection of the unrecognized data.
+    /// > Note: When parsing MIDI files, this is a placeholder for unrecognized or potentially malformed
+    /// > data. It is not defined by the Standard MIDI spec, and is therefore not meant to be used
+    /// > when authoring or writing MIDI files.
     ///
     /// > Standard MIDI File 1.0 Spec:
     /// >
@@ -159,7 +159,7 @@ public enum MIDIFileEvent {
     /// >
     /// > SysEx events and meta-events cancel any running status which was in effect. Running status
     /// > does not apply to and may not be used for these messages.
-    case unrecognizedMeta(UnrecognizedMeta)
+    case undefinedMeta(UndefinedMeta)
 
     /// XMF Patch Type Prefix event.
     ///
