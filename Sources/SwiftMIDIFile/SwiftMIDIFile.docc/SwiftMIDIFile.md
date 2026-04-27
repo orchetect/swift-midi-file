@@ -22,21 +22,13 @@ Refer to SwiftMIDICore documentation for information on MIDI events.
 
 - <doc:Getting-Started>
 
-### MIDI File Timebase
-
-- ``MusicalMIDIFileTimebase``
-- ``SMPTEMIDIFileTimebase``
-
-### MIDI File Events
-
-- ``MIDIFileEvent``
-- ``MIDIFileEventType``
-
 ### MIDI File (SMF1)
 
 - ``MIDI1File``
 - ``MusicalMIDI1File``
+- ``MusicalMIDIFileTimebase``
 - ``SMPTEMIDI1File``
+- ``SMPTEMIDIFileTimebase``
 
 ### MIDI File Format (SMF1)
 
@@ -59,6 +51,11 @@ Refer to SwiftMIDICore documentation for information on MIDI events.
 - ``MIDI1File/Track/DeltaTime``
 - ``MusicalMIDIFileDeltaTime``
 - ``SMPTEMIDIFileDeltaTime``
+
+### MIDI File Events
+
+- ``MIDIFileEvent``
+- ``MIDIFileEventType``
 
 ### Errors
 

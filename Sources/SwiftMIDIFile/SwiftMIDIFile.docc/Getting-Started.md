@@ -124,7 +124,7 @@ MIDI file contents can be read and written by accessing these properties.
 ```swift
 // header chunk metadata
 midiFile.format // type 0, 1, or 2 MIDI file
-midiFile.timebase // musical or timecode-based
+midiFile.timebase // musical or SMPTE timecode-based
 ```
 
 ## Accessing Tracks and Events
@@ -148,9 +148,9 @@ let delta = deltaEvent.delta // delta time
 let event = deltaEvent.event // event payload
 
 switch event {
-case let .noteOn(delta, payload):
+case let .noteOn(payload):
     print(payload.note.number.uInt8Value, payload.velocity.midi1Value, payload.channel.uInt8Value)
-case let .noteOff(delta, payload):
+case let .noteOff(payload):
     print(payload.note.number.uInt8Value, payload.velocity.midi1Value, payload.channel.uInt8Value)
     
 // ... handle additional cases as needed ...
