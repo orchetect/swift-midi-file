@@ -7,33 +7,34 @@
 import SwiftMIDIFile
 import Testing
 
-@Suite struct MusicalMIDI1File_Encoding_Tests {
+@Suite
+struct MusicalMIDI1File_Encoding_Tests {
     @Test
-    func type0() async {
+    func type0() {
         var midiFile = MusicalMIDI1File()
-        
+
         midiFile.format = .singleTrack // Type 1
         midiFile.timebase = .musical(ticksPerQuarterNote: 480)
-        
+
         midiFile.chunks = [
             .track([
                 .text(delta: .none, type: .trackOrSequenceName, string: "Seq-1")
             ])
         ]
-        
+
         #expect(throws: Never.self) {
             try midiFile.rawData()
         }
     }
-    
+
     @Test
     func encodeDP8Markers() /* NOT ASYNC! */ throws {
         var midiFile = MusicalMIDI1File()
-        
+
         midiFile.timebase = .musical(ticksPerQuarterNote: 480)
-        
+
         // 3 tracks
-        
+
         midiFile.chunks = [
             .track([
                 .text(
@@ -113,27 +114,27 @@ import Testing
                 .channelPrefix(delta: .none, channel: 0)
             ])
         ]
-        
+
         // test if midiFile structs are equal by way of Equatable
-        
+
         // Note: It's ok if this throws a deprecation warning. We need to test this specific method.
         let dp8MarkersRawData = try /* NOT AWAIT! */ MusicalMIDI1File(data: kMIDI1File.dp8Markers)
         #expect(midiFile.isEqual(to: dp8MarkersRawData))
-        
+
         // test if raw data is equal
-        
+
         let constructedData = try /* NOT AWAIT! */ midiFile.rawData()
         #expect(constructedData == kMIDI1File.dp8Markers.toData())
     }
-    
+
     @Test
     func encodeDP8Markers_aysnc() async throws {
         var midiFile = MusicalMIDI1File()
-        
+
         midiFile.timebase = .musical(ticksPerQuarterNote: 480)
-        
+
         // 3 tracks
-        
+
         midiFile.chunks = [
             .track([
                 .text(
@@ -185,7 +186,7 @@ import Testing
                     string: "Unlocked Marker 1_00_04_00"
                 )
             ]),
-            
+
             .track([
                 .text(
                     delta: .none,
@@ -205,7 +206,7 @@ import Testing
                     channel: 0
                 )
             ]),
-            
+
             .track([
                 .text(
                     delta: .none,
@@ -215,14 +216,14 @@ import Testing
                 .channelPrefix(delta: .none, channel: 0)
             ])
         ]
-        
+
         // test if midiFile structs are equal by way of Equatable
-        
+
         let dp8MarkersRawData = try await MusicalMIDI1File(data: kMIDI1File.dp8Markers)
         #expect(midiFile.isEqual(to: dp8MarkersRawData))
-        
+
         // test if raw data is equal
-        
+
         let constructedData = try await midiFile.rawData()
         #expect(constructedData == kMIDI1File.dp8Markers.toData())
     }

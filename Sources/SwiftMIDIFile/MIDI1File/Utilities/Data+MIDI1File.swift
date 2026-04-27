@@ -103,7 +103,7 @@ extension MutableDataProtocol {
         // Variable length delta timestamp representing the number of ticks that have elapsed
         // According to the Standard MIDI File 1.0 Spec, the entire delta-time should be at most 4
         // bytes long.
-        
+
         append(contentsOf: Self(midi1FileVariableLengthValue: ticks))
     }
 }

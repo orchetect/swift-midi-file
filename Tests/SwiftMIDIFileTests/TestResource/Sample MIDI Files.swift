@@ -9,7 +9,7 @@ import SwiftMIDIFile
 enum kMIDI1File {
     // swiftformat:disable consecutiveSpaces
     // swiftformat:options --wrap-collections preserve --allow-partial-wrapping true
-    
+
     /// Example Digital Performer 8 MIDI file export containing marker and cue point events.
     static let dp8Markers: [UInt8] = [
         0x4D, 0x54, 0x68, 0x64, // "MThd"
@@ -17,7 +17,7 @@ enum kMIDI1File {
         0x00, 0x01, // type 1 file
         0x00, 0x03, // 3 tracks
         0x01, 0xE0, // musical divisions, 480 ticks per quarter
-        
+
         // track 1
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0xBE, // track length (int 190)
@@ -61,7 +61,7 @@ enum kMIDI1File {
         0x30, 0x5F, 0x30, 0x34, 0x5F, 0x30, 0x30,
         0x00,                   // delta time
         0xFF, 0x2F, 0x00,       // end of track
-        
+
         // track 2
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x1A, // track length
@@ -75,7 +75,7 @@ enum kMIDI1File {
         0x80, 0x3B, 0x40,       // note off
         0x00,                   // delta time
         0xFF, 0x2F, 0x00,       // end of track
-        
+
         // track 3
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x13, // track length
@@ -88,7 +88,7 @@ enum kMIDI1File {
         0x00,
         0xFF, 0x2F, 0x00 // end of track
     ]
-    
+
     /// Example MIDI file containing a custom chunk.
     static let customChunk: [UInt8] = [
         0x4D, 0x54, 0x68, 0x64, // "MThd"
@@ -96,7 +96,7 @@ enum kMIDI1File {
         0x00, 0x01, // type 1 file
         0x00, 0x01, // 1 track
         0x01, 0xE0, // musical divisions, 480 ticks per quarter
-        
+
         // chunk 1 - track
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x3F, // track length (int 63)
@@ -123,7 +123,7 @@ enum kMIDI1File {
         0xA1, 0x1F,
         0x00,                   // delta time
         0xFF, 0x2F, 0x00,       // end of track
-        
+
         // chunk 2 - custom chunk
         0x4B, 0x64, 0x6F, 0x63, // "Kdoc"
         0x00, 0x00, 0x00, 0x23, // track length (35 bytes)
@@ -137,15 +137,15 @@ enum kMIDI1File {
         0x42, 0x30, 0x02, 0x38,
         0x16, 0x40, 0x5A
     ]
-    
+
     /// Example SMPTE timebase file.
     static let smpte: [UInt8] = [
         0x4D, 0x54, 0x68, 0x64, // "MThd"
         0x00, 0x00, 0x00, 0x06, // 6 header bytes
         0x00, 0x01, // type 1 file
         0x00, 0x03, // 3 tracks
-        0b1000_0000 + 0b110_0111, 0x28, // smpte 25fps, 40 ticks per frame
-        
+        0b10000000 + 0b1100111, 0x28, // smpte 25fps, 40 ticks per frame
+
         // chunk 1 - track
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x09, // track length (int 9)
@@ -153,7 +153,7 @@ enum kMIDI1File {
         0xB0, 0x01, 0x40,       // cc
         0x00,                   // delta time
         0xFF, 0x2F, 0x00,       // end of track
-        
+
         // chunk 2 - track
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x0E, // track length (int 14)
@@ -163,7 +163,7 @@ enum kMIDI1File {
         0xB0, 0x02, 0x4B,       // cc
         0x00,                   // delta time
         0xFF, 0x2F, 0x00,       // end of track
-        
+
         // chunk 3 - track
         0x4D, 0x54, 0x72, 0x6B, // "MTrk"
         0x00, 0x00, 0x00, 0x08, // track length (int 8)

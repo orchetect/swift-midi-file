@@ -15,6 +15,8 @@ import SwiftMIDICore
 //   - DocC documentation for each MIDIFileEvent type
 // ------------------------------------
 
+// swiftformat:disable emptyExtensions
+
 extension MIDIFileEvent {
     /// Tempo event for MIDI file tracks using SMPTE timecode timebase.
     /// For a format 1 MIDI file, tempo events should only occur within the first `MTrk` chunk.
