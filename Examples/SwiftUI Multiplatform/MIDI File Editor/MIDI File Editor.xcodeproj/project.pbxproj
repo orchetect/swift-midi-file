@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		E20EF0A22F972BF80019CB33 /* SwiftMIDIFile in Frameworks */ = {isa = PBXBuildFile; productRef = E20EF0A12F972BF80019CB33 /* SwiftMIDIFile */; };
+		E22A74FF2FA49D47006CAB3F /* SwiftMIDIFile in Frameworks */ = {isa = PBXBuildFile; productRef = E22A74FE2FA49D47006CAB3F /* SwiftMIDIFile */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,7 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E20EF0A22F972BF80019CB33 /* SwiftMIDIFile in Frameworks */,
+				E22A74FF2FA49D47006CAB3F /* SwiftMIDIFile in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,7 +78,7 @@
 			);
 			name = "MIDI File Editor";
 			packageProductDependencies = (
-				E20EF0A12F972BF80019CB33 /* SwiftMIDIFile */,
+				E22A74FE2FA49D47006CAB3F /* SwiftMIDIFile */,
 			);
 			productName = VirtualInput;
 			productReference = E27D0E5F284F3FB600F43247 /* MIDI File Editor.app */;
@@ -109,7 +109,7 @@
 			);
 			mainGroup = E27D0E56284F3FB600F43247;
 			packageReferences = (
-				E20EF0A02F972BF80019CB33 /* XCRemoteSwiftPackageReference "swift-midi-file" */,
+				E22A74FD2FA49D47006CAB3F /* XCLocalSwiftPackageReference "../../../" */,
 			);
 			productRefGroup = E27D0E60284F3FB600F43247 /* Products */;
 			projectDirPath = "";
@@ -382,21 +382,16 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		E20EF0A02F972BF80019CB33 /* XCRemoteSwiftPackageReference "swift-midi-file" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/orchetect/swift-midi-file";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		E22A74FD2FA49D47006CAB3F /* XCLocalSwiftPackageReference "../../../" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = "../../../";
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		E20EF0A12F972BF80019CB33 /* SwiftMIDIFile */ = {
+		E22A74FE2FA49D47006CAB3F /* SwiftMIDIFile */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = E20EF0A02F972BF80019CB33 /* XCRemoteSwiftPackageReference "swift-midi-file" */;
 			productName = SwiftMIDIFile;
 		};
 /* End XCSwiftPackageProductDependency section */
