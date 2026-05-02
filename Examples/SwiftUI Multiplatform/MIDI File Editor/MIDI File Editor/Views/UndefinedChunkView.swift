@@ -1,6 +1,6 @@
 //
 //  UndefinedChunkView.swift
-//  SwiftMIDI Examples • https://github.com/orchetect/swift-midi-examples
+//  SwiftMIDI File • https://github.com/orchetect/swift-midi-file
 //  © 2026 Steffan Andrews • Licensed under MIT License
 //
 
