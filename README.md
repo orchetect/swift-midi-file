@@ -8,9 +8,9 @@ Extension for [SwiftMIDI](https://github.com/orchetect/swift-midi) adding suppor
 
 ## Compatibility
 
-| macOS | iOS  | visionOS | tvOS | watchOS | Linux  | Android | Windows |
-| :---: | :--: | :------: | :--: | :-----: | :----: | :-----: | :-----: |
-|   🟢   |  🟢   |    🟢     |  🟢   |    🟢    | 🚧 [^1] | 🚧 [^1]  |    -    |
+| macOS | iOS  | visionOS | tvOS | watchOS | Linux  | Android |  WASM  | Windows |
+| :---: | :--: | :------: | :--: | :-----: | :----: | :-----: | :----: | :-----: |
+|   🟢   |  🟢   |    🟢     |  🟢   |    🟢    | 🚧 [^1] | 🚧 [^1]  | 🚧 [^1] |    -    |
 
 [^1]: Support for indicated platforms is either planned or WIP.
 
