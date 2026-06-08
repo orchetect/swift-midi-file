@@ -128,8 +128,15 @@ public enum MIDIFileEvent {
     /// Includes copyright, marker, cue point, track/sequence name, instrument name, generic text,
     /// program name, device name, or lyric.
     ///
-    /// Text is restricted to ASCII format only. If extended characters or encodings are used, it
-    /// will be converted to ASCII lossily before encoding into the MIDI file.
+    /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
+    /// ASCII characters only. It allows for other text encodings, but it is up to each individual
+    /// manufacturer to implement support for additional encodings such as UTF-8.
+    ///
+    /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
+    /// use ASCII.
+    ///
+    /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
+    /// Pro Tools 2026.4 do not -- they will destructively force any non-ASCII bytes to ASCII.
     case text(Text)
 
     /// Time Signature event.
