@@ -129,8 +129,8 @@ public enum MIDIFileEvent {
     /// program name, device name, or lyric.
     ///
     /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
-    /// ASCII characters only. It allows for other text encodings, but it is up to each individual
-    /// manufacturer to implement support for additional encodings such as UTF-8.
+    /// printable ASCII characters only. It allows for other text encodings, but it is up to each
+    /// individual manufacturer to implement support for additional encodings such as UTF-8.
     ///
     /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
     /// use ASCII.

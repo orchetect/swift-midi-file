@@ -23,14 +23,14 @@ extension MIDIFileEvent {
     /// program name, device name, or lyric.
     ///
     /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
-    /// ASCII characters only. It allows for other text encodings, but it is up to each individual
+    /// printable ASCII characters only. It allows for other text encodings, but it is up to each individual
     /// manufacturer to implement support for additional encodings such as UTF-8.
     ///
     /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
     /// use ASCII.
     ///
     /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
-    /// Pro Tools 2026.4 do not -- they will destructively force any non-ASCII bytes to ASCII.
+    /// Pro Tools 2026.4 do not -- they will force ASCII decoding which may corrupt the text.
     public struct Text {
         /// Type of text event.
         public var textType: EventType = .text
@@ -38,14 +38,14 @@ extension MIDIFileEvent {
         /// Text content.
         ///
         /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
-        /// ASCII characters only. It allows for other text encodings, but it is up to each individual
+        /// printable ASCII characters only. It allows for other text encodings, but it is up to each individual
         /// manufacturer to implement support for additional encodings such as UTF-8.
         ///
         /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
         /// use ASCII.
         ///
         /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
-        /// Pro Tools 2026.4 do not -- they will destructively force any non-ASCII bytes to ASCII.
+        /// Pro Tools 2026.4 do not -- they will force ASCII decoding which may corrupt the text.
         ///
         /// (Arbitrary limit imposed: truncates at 65,536 characters long.)
         public var text: String = "" {
@@ -406,8 +406,8 @@ extension MIDIFileEvent.Text {
     /// Text encoding for MIDI file text events.
     public enum Encoding {
         /// Enforces strict ASCII text encoding.
-        /// Any non-ASCII characters will be lossily converted to valid ASCII.
-        /// This strictly adheres to the Standard MIDI File 1.0 spec.
+        /// Any non-printable ASCII characters will be lossily converted to valid printable ASCII.
+        /// This strictly adheres to the Standard MIDI File 1.0 spec and is the most widely compatible.
         case strictASCII
         
         /// Allows "extended ASCII" characters, which essentially accepts any character comprised
@@ -418,6 +418,9 @@ extension MIDIFileEvent.Text {
         /// Allows UTF-8 encoding.
         ///
         /// Note that some software manufacturers may not support reading UTF-8 encoding.
+        ///
+        /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
+        /// Pro Tools 2026.4 do not -- they will destructively force ASCII decoding which corrupts the text.
         case allowUTF8
     }
 }
