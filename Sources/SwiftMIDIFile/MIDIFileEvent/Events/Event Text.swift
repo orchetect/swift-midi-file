@@ -287,7 +287,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 01 length text
 
-        let encodedData = encodingMode.encode(string: text)
+        let encodedData = encodingMode.encode(string: text, as: D.self)
 
         return textType.prefixBytes
             // length
@@ -469,15 +469,18 @@ extension MIDIFileEvent.Text.EncodingMode {
     }
     
     /// Encodes the string to raw data bytes for encoding in a MIDI file text event.
-    func encode(string: some StringProtocol) -> [UInt8] {
+    func encode<DataType: MutableDataProtocol>(string: some StringProtocol, as dataType: DataType.Type) -> DataType {
         switch self {
         case .strictASCII:
-            string.map { $0.uInt8Value ?? 0x3F } // `?` for potentially invalid chars
+            DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
         case .lenientASCII:
-            string.map { $0.uInt8Value ?? 0x3F } // `?` for potentially invalid chars
+            DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
         case .allowUTF8:
-            string.data(using: .utf8)?.toUInt8Bytes()
-                ?? .init(repeating: 0x3F, count: string.count) // `?` for potentially invalid chars
+            if let data = string.data(using: .utf8) {
+                DataType(data)
+            } else {
+                DataType(repeating: 0x3F, count: string.count) // `?` for potentially invalid chars
+            }
         }
     }
     
