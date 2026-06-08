@@ -23,7 +23,7 @@ By way of example, Logic Pro 12.2 supports UTF-8 when importing and exporting MI
 
 ### Constructors
 
-- ``MIDIFileEvent/text(type:string:encodingMode:)``
+- ``MIDIFileEvent/text(type:string:encoding:)``
 
 ### Switch Case Unwrapping
 
@@ -32,4 +32,4 @@ By way of example, Logic Pro 12.2 supports UTF-8 when importing and exporting MI
 
 ### Text Encoding
 
-- ``MIDIFileEvent/Text/EncodingMode``
+- ``MIDIFileEvent/Text/Encoding``

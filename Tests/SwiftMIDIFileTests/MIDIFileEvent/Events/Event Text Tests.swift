@@ -22,7 +22,7 @@ struct Event_Text_Tests {
         let event = try MIDIFileEvent.Text(midi1FileRawBytes: bytes)
 
         // check encoding mode detected by the decoder
-        #expect(event.encodingMode == .strictASCII)
+        #expect(event.encoding == .strictASCII)
 
         #expect(event.textType == .text)
         #expect(event.text == "")
@@ -51,7 +51,7 @@ struct Event_Text_Tests {
         let event = try MIDIFileEvent.Text(midi1FileRawBytes: bytes)
 
         // check encoding mode detected by the decoder
-        #expect(event.encodingMode == .strictASCII)
+        #expect(event.encoding == .strictASCII)
 
         #expect(event.textType == .text)
         #expect(event.text == "abcd")
@@ -124,7 +124,7 @@ struct Event_Text_Tests {
         let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
         
         // check encoding mode detected by the decoder
-        #expect(text.encodingMode == .lenientASCII)
+        #expect(text.encoding == .lenientASCII)
 
         // check string integrity
         let str = " Copyright © 2000 by Some Guy Hello "
@@ -140,7 +140,7 @@ struct Event_Text_Tests {
         
         // strict ascii
         #expect(
-            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .strictASCII).text
+            MIDIFileEvent.Text(type: .copyright, string: str, encoding: .strictASCII).text
                 == " Copyright (C) 2000 by Some Guy Hello "
         )
         #expect(
@@ -150,13 +150,13 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .lenientASCII).text
+            MIDIFileEvent.Text(type: .copyright, string: str, encoding: .lenientASCII).text
                 == str
         )
         
         // allow UTF8
         #expect(
-            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .allowUTF8).text
+            MIDIFileEvent.Text(type: .copyright, string: str, encoding: .allowUTF8).text
                 == str
         )
     }
@@ -171,7 +171,7 @@ struct Event_Text_Tests {
         let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
 
         // check encoding mode detected by the decoder
-        #expect(text.encodingMode == .allowUTF8)
+        #expect(text.encoding == .allowUTF8)
 
         // check string integrity
         let str = "Emoji 😀"
@@ -187,7 +187,7 @@ struct Event_Text_Tests {
         
         // strict ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .strictASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .strictASCII).text
                 == "Emoji ?"
         )
         #expect(
@@ -197,13 +197,13 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .lenientASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .lenientASCII).text
                 == "Emoji ?"
         )
         
         // callow UTF8
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .allowUTF8).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .allowUTF8).text
                 == str
         )
     }
@@ -219,7 +219,7 @@ struct Event_Text_Tests {
         let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
         
         // check encoding mode detected by the decoder
-        #expect(text.encodingMode == .allowUTF8)
+        #expect(text.encoding == .allowUTF8)
         
         // check string integrity
         let str = "请请让我知道"
@@ -235,7 +235,7 @@ struct Event_Text_Tests {
         
         // strict ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .strictASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .strictASCII).text
                 == "??????"
         )
         #expect(
@@ -245,13 +245,13 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .lenientASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .lenientASCII).text
                 == "??????"
         )
         
         // allow UTF8
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .allowUTF8).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .allowUTF8).text
                 == str
         )
     }

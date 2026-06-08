@@ -55,7 +55,7 @@ extension MIDIFileEvent {
         }
 
         private mutating func validateText() {
-            if let newString = encodingMode.convert(string: text) {
+            if let newString = encoding.convert(string: text) {
                 text = newString
             }
             // note that this checks character count and not actual byte length,
@@ -65,8 +65,8 @@ extension MIDIFileEvent {
             }
         }
 
-        /// Encoding mode to use.
-        public var encodingMode: EncodingMode {
+        /// Encoding to use.
+        public var encoding: Encoding {
             didSet {
                 validateText()
             }
@@ -74,18 +74,18 @@ extension MIDIFileEvent {
 
         // MARK: - Init
 
-        public init(encodingMode: EncodingMode = .strictASCII) {
-            self.encodingMode = encodingMode
+        public init(encoding: Encoding = .strictASCII) {
+            self.encoding = encoding
         }
 
         public init(
             type: EventType,
             string: String,
-            encodingMode: EncodingMode = .strictASCII
+            encoding: Encoding = .strictASCII
         ) {
             textType = type
             text = string
-            self.encodingMode = encodingMode
+            self.encoding = encoding
             
             validateText()
         }
@@ -94,58 +94,58 @@ extension MIDIFileEvent {
         init(
             unsafeType type: EventType,
             string: String,
-            encodingMode: EncodingMode
+            encoding: Encoding
         ) {
             textType = type
             text = string
-            self.encodingMode = encodingMode
+            self.encoding = encoding
         }
 
         // MARK: - Init (types)
 
         /// Construct copyright text.
-        public init(copyright: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .copyright, string: copyright, encodingMode: encodingMode)
+        public init(copyright: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .copyright, string: copyright, encoding: encoding)
         }
 
         /// Construct marker text.
-        public init(marker: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .marker, string: marker, encodingMode: encodingMode)
+        public init(marker: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .marker, string: marker, encoding: encoding)
         }
 
         /// Construct cue point text.
-        public init(cuePoint: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .cuePoint, string: cuePoint, encodingMode: encodingMode)
+        public init(cuePoint: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .cuePoint, string: cuePoint, encoding: encoding)
         }
 
         /// Construct track or sequence name text.
-        public init(trackOrSequenceName: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .trackOrSequenceName, string: trackOrSequenceName, encodingMode: encodingMode)
+        public init(trackOrSequenceName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .trackOrSequenceName, string: trackOrSequenceName, encoding: encoding)
         }
 
         /// Construct instrument name text.
-        public init(instrumentName: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .instrumentName, string: instrumentName, encodingMode: encodingMode)
+        public init(instrumentName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .instrumentName, string: instrumentName, encoding: encoding)
         }
 
         /// Construct text.
-        public init(text: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .text, string: text, encodingMode: encodingMode)
+        public init(text: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .text, string: text, encoding: encoding)
         }
 
         /// Construct program name text.
-        public init(programName: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .programName, string: programName, encodingMode: encodingMode)
+        public init(programName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .programName, string: programName, encoding: encoding)
         }
 
         /// Construct device name text.
-        public init(deviceName: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .deviceName, string: deviceName, encodingMode: encodingMode)
+        public init(deviceName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .deviceName, string: deviceName, encoding: encoding)
         }
 
         /// Construct lyric text.
-        public init(lyric: String, encodingMode: EncodingMode = .strictASCII) {
-            self.init(type: .lyric, string: lyric, encodingMode: encodingMode)
+        public init(lyric: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .lyric, string: lyric, encoding: encoding)
         }
     }
 }
@@ -154,7 +154,7 @@ extension MIDIFileEvent.Text: Equatable {
     public static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.textType == rhs.textType
             && lhs.text == rhs.text
-        // do not include `encodingMode`
+        // do not include `encoding`
     }
 }
 
@@ -162,7 +162,7 @@ extension MIDIFileEvent.Text: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(textType)
         hasher.combine(text)
-        // do not include `encodingMode`
+        // do not include `encoding`
     }
 }
 
@@ -177,13 +177,13 @@ extension MIDIFileEvent {
     public static func text(
         type: Text.EventType,
         string: String,
-        encodingMode: Text.EncodingMode = .strictASCII
+        encoding: Text.Encoding = .strictASCII
     ) -> Self {
         .text(
             .init(
                 type: type,
                 string: string,
-                encodingMode: encodingMode
+                encoding: encoding
             )
         )
     }
@@ -197,12 +197,12 @@ extension MIDI1File.Track.Event {
         delta: DeltaTime = .none,
         type: MIDIFileEvent.Text.EventType,
         string: String,
-        encodingMode: MIDIFileEvent.Text.EncodingMode = .strictASCII
+        encoding: MIDIFileEvent.Text.Encoding = .strictASCII
     ) -> Self {
         let event: MIDIFileEvent = .text(
             type: type,
             string: string,
-            encodingMode: encodingMode
+            encoding: encoding
         )
         return Self(delta: delta, event: event)
     }
@@ -236,10 +236,10 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
         // Step 2: Parse out required bytes
         let textType: EventType
         let text: String
-        let encodingMode: EncodingMode
+        let encoding: Encoding
         let byteLength: Int
         do throws(MIDIFileDecodeError) {
-            (textType, text, encodingMode, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
+            (textType, text, encoding, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
                 // 2-byte preambles
                 let headerBytes = try parser.toMIDIFileDecodeError(
                     malformedReason: "Text is missing event header bytes.",
@@ -259,16 +259,16 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
                     parser.read(bytes: length)
                 )
 
-                let string = EncodingMode.decode(rawStringBytes: byteSlice)
+                let string = Encoding.decode(rawStringBytes: byteSlice)
                 
-                let encodingMode = EncodingMode.mostRestrictiveMode(for: string)
+                let encoding = Encoding.mostRestrictiveEncoding(for: string)
                 
                 let byteLength = parser.readOffset
 
                 return (
                     textType: textTypeMatch,
                     text: string,
-                    encodingMode: encodingMode,
+                    encoding: encoding,
                     byteLength: byteLength
                 )
             }
@@ -276,7 +276,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
             return .unrecoverableError(error: error)
         }
 
-        let newEvent = Self(unsafeType: textType, string: text, encodingMode: encodingMode)
+        let newEvent = Self(unsafeType: textType, string: text, encoding: encoding)
 
         return .event(
             payload: newEvent,
@@ -287,7 +287,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 01 length text
 
-        let encodedData = encodingMode.encode(string: text, as: D.self)
+        let encodedData = encoding.encode(string: text, as: D.self)
 
         return textType.prefixBytes
             // length
@@ -400,14 +400,14 @@ extension MIDIFileEvent.Text.EventType {
     }
 }
 
-// MARK: - EncodingMode
+// MARK: - Encoding
 
 extension MIDIFileEvent.Text {
-    /// MIDI file text encoding mode.
-    public enum EncodingMode {
+    /// Text encoding for MIDI file text events.
+    public enum Encoding {
         /// Enforces strict ASCII text encoding.
         /// Any non-ASCII characters will be lossily converted to valid ASCII.
-        /// This mode strictly adheres to the Standard MIDI File 1.0 spec.
+        /// This strictly adheres to the Standard MIDI File 1.0 spec.
         case strictASCII
         
         /// Allows "extended ASCII" characters, which essentially allows any string comprised
@@ -422,18 +422,18 @@ extension MIDIFileEvent.Text {
     }
 }
 
-extension MIDIFileEvent.Text.EncodingMode: Equatable { }
+extension MIDIFileEvent.Text.Encoding: Equatable { }
 
-extension MIDIFileEvent.Text.EncodingMode: Hashable { }
+extension MIDIFileEvent.Text.Encoding: Hashable { }
 
-extension MIDIFileEvent.Text.EncodingMode: CaseIterable { }
+extension MIDIFileEvent.Text.Encoding: CaseIterable { }
 
-extension MIDIFileEvent.Text.EncodingMode: Sendable { }
+extension MIDIFileEvent.Text.Encoding: Sendable { }
 
-// MARK: - EncodingMode Methods
+// MARK: - Encoding Methods
 
-extension MIDIFileEvent.Text.EncodingMode {
-    /// Returns `true` if the given character can be encoded using the text encoding mode.
+extension MIDIFileEvent.Text.Encoding {
+    /// Returns `true` if the given character can be encoded using the text encoding.
     func contains(character: Character) -> Bool {
         switch self {
         case .strictASCII:
@@ -450,8 +450,8 @@ extension MIDIFileEvent.Text.EncodingMode {
         }
     }
     
-    /// Performs lossy conversion of string if necessary in order to conform it to the encoding
-    /// mode. Returns `nil` if the string already conforms to the encoding mode.
+    /// Performs lossy conversion of string if necessary in order to conform it to the encoding.
+    /// Returns `nil` if the string already conforms to the encoding.
     func convert(string: some StringProtocol) -> String? {
         switch self {
         case .strictASCII:
@@ -512,8 +512,8 @@ extension MIDIFileEvent.Text.EncodingMode {
         return string
     }
     
-    /// Returns the most restrictive encoding mode that the string complies with.
-    static func mostRestrictiveMode(for string: some StringProtocol) -> Self {
+    /// Returns the most restrictive encoding that the string complies with.
+    static func mostRestrictiveEncoding(for string: some StringProtocol) -> Self {
         if Self.strictASCII.convert(string: string) == nil {
             .strictASCII
         } else if Self.lenientASCII.convert(string: string) == nil {
