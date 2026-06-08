@@ -488,7 +488,10 @@ extension MIDIFileEvent.Text.EncodingMode {
     static func decode(rawStringBytes: some DataProtocol) -> String {
         let data = Data(rawStringBytes)
         
-        let string: String = if let text = String(data: data, encoding: .utf8) {
+        let isAllASCIIPrintable = data.allSatisfy({ CharacterSet.asciiPrintable.contains(.init($0)) })
+        
+        // only allow UTF-8 decoding if necessary
+        let string: String = if !isAllASCIIPrintable, let text = String(data: data, encoding: .utf8) {
             text
         } else if let text = String(data: data, encoding: .nonLossyASCII) {
             text
@@ -499,7 +502,7 @@ extension MIDIFileEvent.Text.EncodingMode {
         } else {
             data.asciiDataToStringLossy()
         }
-        
+
         return string
     }
     
