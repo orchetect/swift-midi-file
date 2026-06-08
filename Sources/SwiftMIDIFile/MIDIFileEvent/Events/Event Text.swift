@@ -489,9 +489,15 @@ extension MIDIFileEvent.Text.EncodingMode {
         let data = Data(rawStringBytes)
         
         let isAllASCIIPrintable = data.allSatisfy({ CharacterSet.asciiPrintable.contains(.init($0)) })
+        let replacementChar = "\u{FFFD}" // Encoded in UTF-8 as 0xEF 0xBF 0xBD
         
-        // only allow UTF-8 decoding if necessary
-        let string: String = if !isAllASCIIPrintable, let text = String(data: data, encoding: .utf8) {
+        // only allow UTF-8 decoding if necessary and if it does not contain any replacement chars.
+        // UTF-8 decoding pre-macOS 15 will allow lossy decoding of invalid UTF-8 and use replacement chars
+        // but we want to avoid that. it's not a problem on macOS 15+.
+        let string: String = if !isAllASCIIPrintable,
+                                let text = String(data: data, encoding: .utf8),
+                                !text.contains(replacementChar)
+        {
             text
         } else if let text = String(data: data, encoding: .nonLossyASCII) {
             text
