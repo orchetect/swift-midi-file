@@ -410,10 +410,10 @@ extension MIDIFileEvent.Text {
         /// This strictly adheres to the Standard MIDI File 1.0 spec.
         case strictASCII
         
-        /// Allows "extended ASCII" characters, which essentially allows any string comprised
-        /// of entirely 8-bit unicode scalars. This gives a permissive approach to allowing
-        /// unusual single-byte characters (which some software manufacturers support).
-        case lenientASCII
+        /// Allows "extended ASCII" characters, which essentially accepts any character comprised
+        /// of a single 8-bit unicode scalar. This gives a permissive approach by accommodating
+        /// a variety of single-byte encodings such as ISO 8859-1 ("ISO Latin 1") and Windows-1252.
+        case extendedASCII
         
         /// Allows UTF-8 encoding.
         ///
@@ -439,7 +439,7 @@ extension MIDIFileEvent.Text.Encoding {
         case .strictASCII:
             return character.isPrintableASCII
         
-        case .lenientASCII:
+        case .extendedASCII:
             guard character.unicodeScalars.count == 1 else { return false }
             guard let scalar = character.unicodeScalars.first else { return false }
             return CharacterSet.asciiFull.contains(scalar)
@@ -458,7 +458,7 @@ extension MIDIFileEvent.Text.Encoding {
             let converted = string.convertToASCII()
             return converted != string ? converted : nil
         
-        case .lenientASCII:
+        case .extendedASCII:
             let converted = string.convertToFullASCII()
             return converted != string ? converted : nil
         
@@ -473,7 +473,7 @@ extension MIDIFileEvent.Text.Encoding {
         switch self {
         case .strictASCII:
             DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
-        case .lenientASCII:
+        case .extendedASCII:
             DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
         case .allowUTF8:
             if let data = string.data(using: .utf8) {
@@ -516,8 +516,8 @@ extension MIDIFileEvent.Text.Encoding {
     static func mostRestrictiveEncoding(for string: some StringProtocol) -> Self {
         if Self.strictASCII.convert(string: string) == nil {
             .strictASCII
-        } else if Self.lenientASCII.convert(string: string) == nil {
-            .lenientASCII
+        } else if Self.extendedASCII.convert(string: string) == nil {
+            .extendedASCII
         } else {
             .allowUTF8
         }

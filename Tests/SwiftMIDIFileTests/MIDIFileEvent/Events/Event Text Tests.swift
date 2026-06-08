@@ -124,7 +124,7 @@ struct Event_Text_Tests {
         let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
         
         // check encoding mode detected by the decoder
-        #expect(text.encoding == .lenientASCII)
+        #expect(text.encoding == .extendedASCII)
 
         // check string integrity
         let str = " Copyright © 2000 by Some Guy Hello "
@@ -150,7 +150,7 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .copyright, string: str, encoding: .lenientASCII).text
+            MIDIFileEvent.Text(type: .copyright, string: str, encoding: .extendedASCII).text
                 == str
         )
         
@@ -197,7 +197,7 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encoding: .lenientASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .extendedASCII).text
                 == "Emoji ?"
         )
         
@@ -245,7 +245,7 @@ struct Event_Text_Tests {
         
         // lenient ascii
         #expect(
-            MIDIFileEvent.Text(type: .marker, string: str, encoding: .lenientASCII).text
+            MIDIFileEvent.Text(type: .marker, string: str, encoding: .extendedASCII).text
                 == "??????"
         )
         
