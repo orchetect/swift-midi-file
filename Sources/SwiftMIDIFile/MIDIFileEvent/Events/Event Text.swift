@@ -22,87 +22,149 @@ extension MIDIFileEvent {
     /// Includes copyright, marker, cue point, track/sequence name, instrument name, generic text,
     /// program name, device name, or lyric.
     ///
-    /// Text is restricted to ASCII characters only. If extended characters or other encodings are used, it
-    /// will be converted to ASCII lossily before encoding into the MIDI file.
+    /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
+    /// printable ASCII characters only. It allows for other text encodings, but it is up to each individual
+    /// manufacturer to implement support for additional encodings such as UTF-8.
+    ///
+    /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
+    /// use ASCII.
+    ///
+    /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
+    /// Pro Tools 2026.4 do not -- they will force ASCII decoding which may corrupt the text.
     public struct Text {
         /// Type of text event.
         public var textType: EventType = .text
 
         /// Text content.
         ///
-        /// ASCII text only. If extended characters or encodings are used, it will be converted to
-        /// ASCII before encoding into the MIDI file.
+        /// The Standard MIDI File 1.0 Spec specifies that for widest compatibility, text should consist of
+        /// printable ASCII characters only. It allows for other text encodings, but it is up to each individual
+        /// manufacturer to implement support for additional encodings such as UTF-8.
+        ///
+        /// That being said, any valid text encoding is supported by SwiftMIDI, but it is recommended to
+        /// use ASCII.
+        ///
+        /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
+        /// Pro Tools 2026.4 do not -- they will force ASCII decoding which may corrupt the text.
         ///
         /// (Arbitrary limit imposed: truncates at 65,536 characters long.)
         public var text: String = "" {
             didSet {
-                if oldValue != text { text_Validate() }
+                validateText()
             }
         }
 
-        private mutating func text_Validate() {
+        private mutating func validateText() {
+            if let newString = encoding.convert(string: text) {
+                text = newString
+            }
+            // note that this checks character count and not actual byte length,
+            // so non-ASCII strings could actually exceed this byte length
             if text.count > 65536 {
-                text = text.prefix(65536).convertToASCII()
+                text = String(text.prefix(65536))
+            }
+        }
+
+        /// Encoding to use.
+        public var encoding: Encoding {
+            didSet {
+                validateText()
             }
         }
 
         // MARK: - Init
 
-        public init() { }
+        public init(encoding: Encoding = .strictASCII) {
+            self.encoding = encoding
+        }
 
         public init(
             type: EventType,
-            string: String
+            string: String,
+            encoding: Encoding = .strictASCII
         ) {
             textType = type
             text = string
-
-            text_Validate()
+            self.encoding = encoding
+            
+            validateText()
+        }
+        
+        /// Internal: Init used by the event decoder to bypass text validation.
+        init(
+            unsafeType type: EventType,
+            string: String,
+            encoding: Encoding
+        ) {
+            textType = type
+            text = string
+            self.encoding = encoding
         }
 
         // MARK: - Init (types)
 
-        public init(copyright: String) {
-            self.init(type: .copyright, string: copyright)
+        /// Construct copyright text.
+        public init(copyright: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .copyright, string: copyright, encoding: encoding)
         }
 
-        public init(marker: String) {
-            self.init(type: .marker, string: marker)
+        /// Construct marker text.
+        public init(marker: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .marker, string: marker, encoding: encoding)
         }
 
-        public init(cuePoint: String) {
-            self.init(type: .cuePoint, string: cuePoint)
+        /// Construct cue point text.
+        public init(cuePoint: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .cuePoint, string: cuePoint, encoding: encoding)
         }
 
-        public init(trackOrSequenceName: String) {
-            self.init(type: .trackOrSequenceName, string: trackOrSequenceName)
+        /// Construct track or sequence name text.
+        public init(trackOrSequenceName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .trackOrSequenceName, string: trackOrSequenceName, encoding: encoding)
         }
 
-        public init(instrumentName: String) {
-            self.init(type: .instrumentName, string: instrumentName)
+        /// Construct instrument name text.
+        public init(instrumentName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .instrumentName, string: instrumentName, encoding: encoding)
         }
 
-        public init(text: String) {
-            self.init(type: .text, string: text)
+        /// Construct text.
+        public init(text: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .text, string: text, encoding: encoding)
         }
 
-        public init(programName: String) {
-            self.init(type: .programName, string: programName)
+        /// Construct program name text.
+        public init(programName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .programName, string: programName, encoding: encoding)
         }
 
-        public init(deviceName: String) {
-            self.init(type: .deviceName, string: deviceName)
+        /// Construct device name text.
+        public init(deviceName: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .deviceName, string: deviceName, encoding: encoding)
         }
 
-        public init(lyric: String) {
-            self.init(type: .lyric, string: lyric)
+        /// Construct lyric text.
+        public init(lyric: String, encoding: Encoding = .strictASCII) {
+            self.init(type: .lyric, string: lyric, encoding: encoding)
         }
     }
 }
 
-extension MIDIFileEvent.Text: Equatable { }
+extension MIDIFileEvent.Text: Equatable {
+    public static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.textType == rhs.textType
+            && lhs.text == rhs.text
+        // do not include `encoding`
+    }
+}
 
-extension MIDIFileEvent.Text: Hashable { }
+extension MIDIFileEvent.Text: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(textType)
+        hasher.combine(text)
+        // do not include `encoding`
+    }
+}
 
 extension MIDIFileEvent.Text: Sendable { }
 
@@ -112,17 +174,16 @@ extension MIDIFileEvent {
     /// Text event.
     /// Includes copyright, marker, cue point, track/sequence name, instrument name, generic text,
     /// program name, device name, or lyric.
-    ///
-    /// Text is restricted to ASCII format only. If extended characters or encodings are used, it
-    /// will be converted to ASCII lossily before encoding into the MIDI file.
     public static func text(
         type: Text.EventType,
-        string: String
+        string: String,
+        encoding: Text.Encoding = .strictASCII
     ) -> Self {
         .text(
             .init(
                 type: type,
-                string: string
+                string: string,
+                encoding: encoding
             )
         )
     }
@@ -132,17 +193,16 @@ extension MIDI1File.Track.Event {
     /// Text event.
     /// Includes copyright, marker, cue point, track/sequence name, instrument name, generic text,
     /// program name, device name, or lyric.
-    ///
-    /// Text is restricted to ASCII format only. If extended characters or encodings are used, it
-    /// will be converted to ASCII lossily before encoding into the MIDI file.
     public static func text(
         delta: DeltaTime = .none,
         type: MIDIFileEvent.Text.EventType,
-        string: String
+        string: String,
+        encoding: MIDIFileEvent.Text.Encoding = .strictASCII
     ) -> Self {
         let event: MIDIFileEvent = .text(
             type: type,
-            string: string
+            string: string,
+            encoding: encoding
         )
         return Self(delta: delta, event: event)
     }
@@ -176,9 +236,10 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
         // Step 2: Parse out required bytes
         let textType: EventType
         let text: String
+        let encoding: Encoding
         let byteLength: Int
         do throws(MIDIFileDecodeError) {
-            (textType, text, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
+            (textType, text, encoding, byteLength) = try stream.withDataParser { parser throws(MIDIFileDecodeError) in
                 // 2-byte preambles
                 let headerBytes = try parser.toMIDIFileDecodeError(
                     malformedReason: "Text is missing event header bytes.",
@@ -198,13 +259,16 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
                     parser.read(bytes: length)
                 )
 
-                let formedText = byteSlice.asciiDataToStringLossy() // .removing(.newlines)
-
+                let string = Encoding.decode(rawStringBytes: byteSlice)
+                
+                let encoding = Encoding.mostRestrictiveEncoding(for: string)
+                
                 let byteLength = parser.readOffset
 
                 return (
                     textType: textTypeMatch,
-                    text: formedText,
+                    text: string,
+                    encoding: encoding,
                     byteLength: byteLength
                 )
             }
@@ -212,7 +276,7 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
             return .unrecoverableError(error: error)
         }
 
-        let newEvent = Self(type: textType, string: text)
+        let newEvent = Self(unsafeType: textType, string: text, encoding: encoding)
 
         return .event(
             payload: newEvent,
@@ -223,13 +287,13 @@ extension MIDIFileEvent.Text: MIDIFileEventPayload {
     public func midi1FileRawBytes<D: MutableDataProtocol>(as dataType: D.Type) -> D {
         // FF 01 length text
 
-        let stringData = text.data(using: .nonLossyASCII) ?? Data()
+        let encodedData = encoding.encode(string: text, as: D.self)
 
         return textType.prefixBytes
             // length
-            + D(midi1FileVariableLengthValue: stringData.count)
+            + D(midi1FileVariableLengthValue: encodedData.count)
             // text
-            + stringData
+            + encodedData
     }
 
     public var midiFileDescription: String {
@@ -315,7 +379,7 @@ extension MIDIFileEvent.Text.EventType {
     }
 }
 
-// MARK: - TextEventType Static
+// MARK: - EventType Static
 
 extension MIDIFileEvent.Text.EventType {
     /// The prefix bytes that define the start of the event.
@@ -333,5 +397,190 @@ extension MIDIFileEvent.Text.EventType {
         case .deviceName:          [0xFF, 0x09]
         }
         // swiftformat:enable consecutiveSpaces
+    }
+}
+
+// MARK: - Encoding
+
+extension MIDIFileEvent.Text {
+    /// Text encoding for MIDI file text events.
+    public enum Encoding {
+        /// Enforces strict ASCII text encoding.
+        /// Any non-printable ASCII characters will be lossily converted to valid printable ASCII.
+        /// This strictly adheres to the Standard MIDI File 1.0 spec and is the most widely compatible.
+        case strictASCII
+        
+        /// Allows "extended ASCII" characters, which essentially accepts any character comprised
+        /// of a single 8-bit unicode scalar. This gives a permissive approach by accommodating
+        /// a variety of single-byte encodings such as ISO 8859-1 ("ISO Latin 1") and Windows-1252.
+        case extendedASCII
+        
+        /// Allows UTF-8 encoding.
+        ///
+        /// Note that some software manufacturers may not support reading UTF-8 encoding.
+        ///
+        /// Logic Pro 12.2 supports UTF-8 when importing and exporting MIDI files. However, Cubase 14 and
+        /// Pro Tools 2026.4 do not -- they will destructively force ASCII decoding which corrupts the text.
+        case allowUTF8
+    }
+}
+
+extension MIDIFileEvent.Text.Encoding: Equatable { }
+
+extension MIDIFileEvent.Text.Encoding: Hashable { }
+
+extension MIDIFileEvent.Text.Encoding: CaseIterable { }
+
+extension MIDIFileEvent.Text.Encoding: Sendable { }
+
+// MARK: - Encoding Methods
+
+extension MIDIFileEvent.Text.Encoding {
+    /// Returns `true` if the given character can be encoded using the text encoding.
+    func contains(character: Character) -> Bool {
+        switch self {
+        case .strictASCII:
+            return character.isPrintableASCII
+        
+        case .extendedASCII:
+            guard character.unicodeScalars.count == 1 else { return false }
+            guard let scalar = character.unicodeScalars.first else { return false }
+            return CharacterSet.asciiFull.contains(scalar)
+        
+        case .allowUTF8:
+            // any character can be represented in UTF-8
+            return true
+        }
+    }
+    
+    /// Performs lossy conversion of string if necessary in order to conform it to the encoding.
+    /// Returns `nil` if the string already conforms to the encoding.
+    func convert(string: some StringProtocol) -> String? {
+        switch self {
+        case .strictASCII:
+            let converted = string.convertToASCII()
+            return converted != string ? converted : nil
+        
+        case .extendedASCII:
+            let converted = string.convertToFullASCII()
+            return converted != string ? converted : nil
+        
+        case .allowUTF8:
+            // any string can be represented in UTF-8
+            return nil
+        }
+    }
+    
+    /// Encodes the string to raw data bytes for encoding in a MIDI file text event.
+    func encode<DataType: MutableDataProtocol>(string: some StringProtocol, as dataType: DataType.Type) -> DataType {
+        switch self {
+        case .strictASCII:
+            DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
+        case .extendedASCII:
+            DataType(string.map { $0.uInt8Value ?? 0x3F }) // `?` for potentially invalid chars
+        case .allowUTF8:
+            if let data = string.data(using: .utf8) {
+                DataType(data)
+            } else {
+                DataType(repeating: 0x3F, count: string.count) // `?` for potentially invalid chars
+            }
+        }
+    }
+    
+    /// Decodes raw text bytes.
+    static func decode(rawStringBytes: some DataProtocol) -> String {
+        let data = Data(rawStringBytes)
+        
+        let isAllASCIIPrintable = data.allSatisfy({ CharacterSet.asciiPrintable.contains(.init($0)) })
+        let replacementChar = "\u{FFFD}" // Encoded in UTF-8 as 0xEF 0xBF 0xBD
+        
+        // only allow UTF-8 decoding if necessary and if it does not contain any replacement chars.
+        // UTF-8 decoding pre-macOS 15 will allow lossy decoding of invalid UTF-8 and use replacement chars
+        // but we want to avoid that. it's not a problem on macOS 15+.
+        let string: String = if !isAllASCIIPrintable,
+                                let text = String(data: data, encoding: .utf8),
+                                !text.contains(replacementChar)
+        {
+            text
+        } else if let text = String(data: data, encoding: .nonLossyASCII) {
+            text
+        } else if let text = String(data: data, encoding: .ascii) {
+            text
+        } else if let text = String(data: data, encoding: .isoLatin1) {
+            text
+        } else {
+            data.asciiDataToStringLossy()
+        }
+
+        return string
+    }
+    
+    /// Returns the most restrictive encoding that the string complies with.
+    static func mostRestrictiveEncoding(for string: some StringProtocol) -> Self {
+        if Self.strictASCII.convert(string: string) == nil {
+            .strictASCII
+        } else if Self.extendedASCII.convert(string: string) == nil {
+            .extendedASCII
+        } else {
+            .allowUTF8
+        }
+    }
+}
+
+// MARK: - String & Character Utilities
+
+extension StringProtocol {
+    /// Returns `true` if the string is entirely comprised of printable ASCII characters.
+    var isPrintableASCII: Bool {
+        allSatisfy(\.isPrintableASCII)
+    }
+    
+    /// Returns `true` if the string is entirely comprised of 8-bit scalars.
+    var is8Bit: Bool {
+        allSatisfy(\.is8Bit)
+    }
+    
+    /// Converts a string to full ASCII (8-bit scalars)
+    func convertToFullASCII() -> String {
+        var outputChars: [Character] = []
+        for char in self {
+            if char.is8Bit {
+                outputChars.append(char)
+            } else {
+                let converted = "\(char)".convertToASCII()
+                for convertedChar in converted {
+                    if convertedChar.is8Bit {
+                        outputChars.append(convertedChar)
+                    } else {
+                        outputChars.append("?")
+                    }
+                }
+            }
+        }
+        return String(outputChars)
+    }
+}
+
+extension Character {
+    /// Returns `true` if the character is a printable ASCII character.
+    var isPrintableASCII: Bool {
+        guard unicodeScalars.count == 1 else { return false }
+        guard let scalar = unicodeScalars.first else { return false }
+        return CharacterSet.asciiPrintable.contains(scalar)
+    }
+    
+    /// Returns `true` if the character is a single 8-bit scalar.
+    var is8Bit: Bool {
+        uInt8Value != nil
+    }
+    
+    /// Returns the byte value if the character is a single 8-bit scalar.
+    var uInt8Value: UInt8? {
+        guard unicodeScalars.count == 1 else { return nil }
+        guard let scalarValue = unicodeScalars.first?.value else { return nil }
+        // This is the full 8-bit value range, same as `CharacterSet.fullASCII`
+        guard (0x00 ... 0xFF).contains(scalarValue) else { return nil }
+        let byte = UInt8(scalarValue) // guaranteed to succeed because of prior guard check
+        return byte
     }
 }
