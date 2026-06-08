@@ -21,6 +21,9 @@ struct Event_Text_Tests {
 
         let event = try MIDIFileEvent.Text(midi1FileRawBytes: bytes)
 
+        // check encoding mode detected by the decoder
+        #expect(event.encodingMode == .strictASCII)
+
         #expect(event.textType == .text)
         #expect(event.text == "")
     }
@@ -46,6 +49,9 @@ struct Event_Text_Tests {
         ]
 
         let event = try MIDIFileEvent.Text(midi1FileRawBytes: bytes)
+
+        // check encoding mode detected by the decoder
+        #expect(event.encodingMode == .strictASCII)
 
         #expect(event.textType == .text)
         #expect(event.text == "abcd")
@@ -106,23 +112,148 @@ struct Event_Text_Tests {
     // swiftformat:options --maxwidth none
 
     @Test
-    func extendedCharacters() throws {
+    func extendedASCIICharacters() throws {
         let rawData: [UInt8] = [
-            0xFF, 0x02, 0x22, 0x43, 0x6F, 0x70, 0x79, 0x72,
-            0x69, 0x67, 0x68, 0x74, 0x20, 0xA9, 0x20, 0x32,
-            0x30, 0x30, 0x30, 0x20, 0x62, 0x79, 0x20, 0x53,
-            0x6F, 0x6D, 0x65, 0x20, 0x47, 0x75, 0x79, 0x20,
-            0x48, 0x65, 0x6C, 0x6C, 0x6F
+            0xFF, 0x02, 0x24, 0x20, 0x43, 0x6F, 0x70, 0x79,
+            0x72, 0x69, 0x67, 0x68, 0x74, 0x20, 0xA9, 0x20,
+            0x32, 0x30, 0x30, 0x30, 0x20, 0x62, 0x79, 0x20,
+            0x53, 0x6F, 0x6D, 0x65, 0x20, 0x47, 0x75, 0x79,
+            0x20, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20
+        ]
+
+        let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
+        
+        // check encoding mode detected by the decoder
+        #expect(text.encodingMode == .lenientASCII)
+
+        // check string integrity
+        let str = " Copyright © 2000 by Some Guy Hello "
+        #expect(text.text == str)
+
+        // check re-encoding
+        #expect(text.midi1FileRawBytes(as: [UInt8].self) == rawData)
+    }
+    
+    @Test
+    func extendedASCIICharacters_Init() throws {
+        let str = " Copyright © 2000 by Some Guy Hello "
+        
+        // strict ascii
+        #expect(
+            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .strictASCII).text
+                == " Copyright (C) 2000 by Some Guy Hello "
+        )
+        #expect(
+            MIDIFileEvent.Text(copyright: str).text // uses strictASCII encoding mode by default
+                == " Copyright (C) 2000 by Some Guy Hello "
+        )
+        
+        // lenient ascii
+        #expect(
+            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .lenientASCII).text
+                == str
+        )
+        
+        // allow UTF8
+        #expect(
+            MIDIFileEvent.Text(type: .copyright, string: str, encodingMode: .allowUTF8).text
+                == str
+        )
+    }
+
+    @Test
+    func utf8Characters_Emoji() throws {
+        let rawData: [UInt8] = [
+             0xFF, 0x06, 0x0A, 0x45, 0x6D, 0x6F, 0x6A, 0x69,
+             0x20, 0xF0, 0x9F, 0x98, 0x80
         ]
 
         let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
 
-        // check string integrity
-        let str = "Copyright © 2000 by Some Guy Hello"
-        #expect(text.text == str)
+        // check encoding mode detected by the decoder
+        #expect(text.encodingMode == .allowUTF8)
 
-        // check instance equality
-        #expect(text == MIDIFileEvent.Text(copyright: str))
+        // check string integrity
+        let str = "Emoji 😀"
+        #expect(text.text == str)
+        
+        // check re-encoding
+        #expect(text.midi1FileRawBytes(as: [UInt8].self) == rawData)
+    }
+    
+    @Test
+    func utf8Characters_Emoji_Init() throws {
+        let str = "Emoji 😀"
+        
+        // strict ascii
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .strictASCII).text
+                == "Emoji ?"
+        )
+        #expect(
+            MIDIFileEvent.Text(marker: str).text // uses strictASCII encoding mode by default
+                == "Emoji ?"
+        )
+        
+        // lenient ascii
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .lenientASCII).text
+                == "Emoji ?"
+        )
+        
+        // callow UTF8
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .allowUTF8).text
+                == str
+        )
+    }
+    
+    @Test
+    func utf8Characters_Chinese() throws {
+        let rawData: [UInt8] = [
+            0xFF, 0x06, 0x12, 0xE8, 0xAF, 0xB7, 0xE8, 0xAF,
+            0xB7, 0xE8, 0xAE, 0xA9, 0xE6, 0x88, 0x91, 0xE7,
+            0x9F, 0xA5, 0xE9, 0x81, 0x93
+        ]
+        
+        let text = try MIDIFileEvent.Text(midi1FileRawBytes: rawData)
+        
+        // check encoding mode detected by the decoder
+        #expect(text.encodingMode == .allowUTF8)
+        
+        // check string integrity
+        let str = "请请让我知道"
+        #expect(text.text == str)
+        
+        // check re-encoding
+        #expect(text.midi1FileRawBytes(as: [UInt8].self) == rawData)
+    }
+    
+    @Test
+    func utf8Characters_Chinese_Init() throws {
+        let str = "请请让我知道"
+        
+        // strict ascii
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .strictASCII).text
+                == "??????"
+        )
+        #expect(
+            MIDIFileEvent.Text(marker: str).text // uses strictASCII encoding mode by default
+                == "??????"
+        )
+        
+        // lenient ascii
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .lenientASCII).text
+                == "??????"
+        )
+        
+        // allow UTF8
+        #expect(
+            MIDIFileEvent.Text(type: .marker, string: str, encodingMode: .allowUTF8).text
+                == str
+        )
     }
 
     @Test
